@@ -3,27 +3,22 @@
 <head>
   <meta charset="utf-8" /> 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MR.Oza ALL COMPUTER CLASS  AND AOIT CLASS </title>
+  <title>MR.Oza ALL COMPUTER CLASS AND AOIT CLASS</title>
   <meta name="description" content="Live Helpdesk with Material Design UI, animated 3D title, and realtime chat with history. Developed by Mr OZA." />
-  <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <!-- Materialize CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
   <style>
-    :root{
-      --brandA:#2196f3; --brandB:#26a69a;
-      --bg-grad: linear-gradient(135deg, var(--brandA), var(--brandB));
-      --chip-open:#42a5f5; --chip-progress:#fbc02d; --chip-closed:#66bb6a;
-    }
+    :root{ --brandA:#2196f3; --brandB:#26a69a; --bg-grad:linear-gradient(135deg,var(--brandA),var(--brandB));
+           --chip-open:#42a5f5; --chip-progress:#fbc02d; --chip-closed:#66bb6a }
     html,body{height:100%;background:#ECEFF1;font-family:Roboto,system-ui,-apple-system,Arial}
-    /* App bar */
     .appbar{background:var(--bg-grad);background-size:200% 200%;animation:barShift 10s ease infinite;box-shadow:0 8px 24px rgba(0,0,0,.2)}
     @keyframes barShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
     .brand-logo{font-weight:800;letter-spacing:.5px}.subtle{opacity:.85}
 
-    /* 3D Hero */
-    .hero{position:relative;background:radial-gradient(1200px 400px at 10% 0%,rgba(255,255,255,.3),transparent),radial-gradient(1200px 400px at 90% 0%,rgba(255,255,255,.2),transparent),var(--bg-grad);background-size:200% 200%;animation:heroGrad 12s ease infinite;padding:36px 0 28px;color:#fff;overflow:hidden}
+    .hero{position:relative;background:radial-gradient(1200px 400px at 10% 0%,rgba(255,255,255,.3),transparent),
+                                  radial-gradient(1200px 400px at 90% 0%,rgba(255,255,255,.2),transparent),
+                                  var(--bg-grad);background-size:200% 200%;animation:heroGrad 12s ease infinite;padding:36px 0 28px;color:#fff;overflow:hidden}
     @keyframes heroGrad{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
     .hero-wrap{perspective:900px;text-align:center}
     .title3d{display:inline-block;font-size:clamp(28px,6vw,64px);font-weight:900;letter-spacing:.8px;transform-style:preserve-3d;transform:rotateX(10deg) rotateY(-12deg);animation:tilt 6s ease-in-out infinite alternate;position:relative;line-height:1.05;text-shadow:0 1px 0 rgba(0,0,0,.1),0 2px 0 rgba(0,0,0,.1),0 3px 0 rgba(0,0,0,.1),0 4px 0 rgba(0,0,0,.1),0 10px 20px rgba(0,0,0,.22)}
@@ -32,7 +27,6 @@
     @keyframes sheen{0%{transform:translateX(-120%) skewX(-8deg)}100%{transform:translateX(120%) skewX(-8deg)}}
     .subtitle{margin-top:8px;font-weight:500;opacity:.95;text-shadow:0 10px 22px rgba(0,0,0,.25)}
 
-    /* Layout */
     .app{padding:16px}
     .pane{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 12px 24px rgba(0,0,0,.08);transition:transform .2s,box-shadow .2s}
     .pane:hover{transform:translateY(-2px);box-shadow:0 18px 32px rgba(0,0,0,.12)}
@@ -40,7 +34,6 @@
     .pane-body{height:calc(100vh - 275px);overflow:auto}
     .pane-footer{padding:10px;border-top:1px solid #ECEFF1}
 
-    /* Tickets */
     .ticket-item{cursor:pointer;border-bottom:1px dashed #eceff1;padding:12px 12px 10px;transition:background .2s}
     .ticket-item:hover{background:#f7f9fa}.active-ticket{background:#e3f2fd}
     .ticket-title{font-weight:600}
@@ -48,32 +41,27 @@
     .status-chip{color:#fff;border-radius:999px;font-weight:600;padding:2px 10px;font-size:.75rem}
     .chip-open{background:var(--chip-open)}.chip-progress{background:var(--chip-progress)}.chip-closed{background:var(--chip-closed)}
 
-    /* Chat */
     .messages{padding:16px;display:flex;flex-direction:column;gap:10px}
-    .bubble{max-width:78%;padding:10px 14px;border-radius:18px;line-height:1.35;box-shadow:0 4px 14px rgba(0,0,0,.08);animation:popIn .22s ease-out}
+    .bubble{max-width:78%;padding:10px 14px;border-radius:18px;line-height:1.35;box-shadow:0 4px 14px rgba(0,0,0,.08);animation:popIn .22s ease-out;position:relative}
     .me{background:#e8f5e9;align-self:flex-end;border-bottom-right-radius:6px}
     .them{background:#e3f2fd;align-self:flex-start;border-bottom-left-radius:6px}
     .meta{font-size:.72rem;opacity:.7;margin-top:4px}
+    .bubble-actions{position:absolute; top:6px; right:8px; cursor:pointer; opacity:.45; transition:opacity .2s}
+    .bubble:hover .bubble-actions{opacity:1}
+    .bubble-actions i{font-size:18px}
     @keyframes popIn{from{transform:translateY(8px) scale(.97);opacity:0}to{transform:none;opacity:1}}
 
-    /* Typing */
     .typing{display:none;align-items:center;gap:6px;padding:6px 12px}
     .typing .dot{width:8px;height:8px;border-radius:50%;background:#90caf9;animation:blink 1s infinite}
     .typing .dot:nth-child(2){animation-delay:.15s}.typing .dot:nth-child(3){animation-delay:.3s}
     @keyframes blink{0%,80%,100%{opacity:.15}40%{opacity:1}}
 
-    /* Send bar (FIXED) */
     .sendbar{display:flex;align-items:center;gap:12px}
     .sendbar .text{flex:1 1 auto;height:56px;border-radius:28px;border:1px solid #e0e0e0;background:#fafafa;padding:0 16px;font-size:1rem}
     .sendbar .text:focus{outline:none;border-color:#90caf9;box-shadow:0 0 0 4px rgba(33,150,243,.10)}
     .sendbar .status{width:170px;height:44px;border-radius:12px;padding:0 8px}
     .sendbar button{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-    @media(max-width:600px){
-      .sendbar{flex-wrap:wrap}
-      .sendbar .text{order:1;width:100%}
-      .sendbar button{order:2}
-      .sendbar .status{order:3;width:100%}
-    }
+    @media(max-width:600px){.sendbar{flex-wrap:wrap}.sendbar .text{order:1;width:100%}.sendbar button{order:2}.sendbar .status{order:3;width:100%}}
 
     .badge-mini{font-size:.72rem;border-radius:8px;padding:2px 6px;background:#eceff1}
     .footer-note{font-size:.85rem;opacity:.75;padding:8px 0 16px}
@@ -85,25 +73,23 @@
     <div class="nav-wrapper container">
       <a href="#" class="brand-logo">Helpdesk <span class="subtle">Live</span></a>
       <ul class="right hide-on-med-and-down">
-        <li><a id="btnProfile" class="tooltipped" data-position="bottom" data-tooltip="Profile & Agent Mode"><i class="material-icons">manage_accounts</i></a></li>
+        <li><a id="btnProfile" class="tooltipped" data-position="bottom" data-tooltip="Profile & Admin Mode"><i class="material-icons">manage_accounts</i></a></li>
         <li><a id="btnTheme" class="tooltipped" data-position="bottom" data-tooltip="Toggle light/dark"><i class="material-icons">brightness_6</i></a></li>
       </ul>
     </div>
   </nav>
 
-  <!-- 3D Animated Title -->
+  <!-- 3D Title -->
   <section class="hero">
     <div class="container hero-wrap">
-      <div class="title3d">
-        MR.OZA ALL COMPUTER CLASSES AND AOIT CLASSES 
-        <div class="sheen"></div>
-      </div>
-      <div class="subtitle">DEVELOP BY MR.OZA </div>
+      <div class="title3d">MR.OZA ALL COMPUTER CLASSES AND AOIT CLASSES<div class="sheen"></div></div>
+      <div class="subtitle">DEVELOP BY MR.OZA</div>
+    </div>
   </section>
 
   <main class="app container">
     <div class="row">
-      <!-- Left: Tickets -->
+      <!-- Tickets -->
       <div class="col s12 l4">
         <div class="pane">
           <div class="pane-header">
@@ -115,28 +101,33 @@
               <a id="refreshTickets" class="btn-flat waves-effect waves-teal"><i class="material-icons left">refresh</i>Refresh</a>
             </div>
           </div>
-          <div class="pane-body" id="ticketsPane">
-            <ul id="ticketList" class="collection" style="border:none; margin:0">
+          <div class="pane-body">
+            <ul id="ticketList" class="collection" style="border:none;margin:0">
               <li class="collection-item skeleton" style="height:64px"></li>
               <li class="collection-item skeleton" style="height:64px"></li>
               <li class="collection-item skeleton" style="height:64px"></li>
             </ul>
           </div>
-          <div class="pane-footer">
-            <div class="footer-note">Tip: Click a ticket to chat in real time. Use the + to open a new ticket.</div>
-          </div>
+          <div class="pane-footer"><div class="footer-note">Tip: Click a ticket to chat in real time. Use the + to open a new ticket.</div></div>
         </div>
       </div>
 
-      <!-- Right: Chat -->
+      <!-- Chat -->
       <div class="col s12 l8">
         <div class="pane">
           <div class="pane-header" id="chatHeader">
             <i class="material-icons">chat</i>
             <div style="font-weight:700">Chat</div>
             <span id="headerSubject" class="badge-mini" style="margin-left:8px">No ticket selected</span>
-            <span id="headerStatus" class="status-chip chip-open" style="margin-left:auto; display:none">OPEN</span>
+            <span id="headerStatus" class="status-chip chip-open" style="display:none;margin-left:8px">OPEN</span>
+
+            <!-- Admin actions -->
+            <div id="ticketActions" style="margin-left:auto;display:none;align-items:center;gap:6px">
+              <a id="closeTicketBtn" class="btn-flat waves-effect"><i class="material-icons left">check_circle</i><span id="closeTicketText">Close</span></a>
+              <a id="deleteTicketBtn" class="btn-flat red-text text-darken-1 tooltipped" data-tooltip="Delete ticket"><i class="material-icons">delete_forever</i></a>
+            </div>
           </div>
+
           <div class="pane-body" id="chatPane">
             <div class="messages" id="messages"></div>
             <div class="typing" id="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
@@ -149,18 +140,16 @@
                 <option value="progress">In Progress</option>
                 <option value="closed">Closed</option>
               </select>
-              <button id="sendBtn" class="btn-large pulse-sheen waves-effect waves-light" type="submit"><i class="material-icons">send</i></button>
+              <button id="sendBtn" class="btn-large waves-effect waves-light" type="submit"><i class="material-icons">send</i></button>
             </form>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- FAB: New ticket -->
+    <!-- New ticket FAB -->
     <div class="fixed-action-btn">
-      <a id="fabNew" class="btn-floating btn-large teal pulse-sheen tooltipped" data-position="left" data-tooltip="New Ticket">
-        <i class="large material-icons">add</i>
-      </a>
+      <a id="fabNew" class="btn-floating btn-large teal tooltipped" data-position="left" data-tooltip="New Ticket"><i class="large material-icons">add</i></a>
     </div>
   </main>
 
@@ -195,10 +184,10 @@
     </div>
   </div>
 
-  <!-- Modal: Profile / Agent Mode -->
+  <!-- Modal: Profile / Admin -->
   <div id="modalProfile" class="modal">
     <div class="modal-content">
-      <h5><i class="material-icons">person</i> Your Profile</h5>
+      <h5><i class="material-icons">person</i> Profile</h5>
       <div class="row" style="margin-top:14px">
         <div class="input-field col s12 m6">
           <input id="displayName" type="text" maxlength="30" />
@@ -206,19 +195,20 @@
         </div>
         <div class="input-field col s12 m6">
           <input id="emailHint" type="text" placeholder="optional: email for context" />
-          <label for="emailHint" class="active">Email (not stored, just used in messages)</label>
+          <label for="emailHint" class="active">Email (optional)</label>
         </div>
       </div>
       <div class="card blue-grey lighten-5 z-depth-0" style="padding:12px">
         <label>
-          <input type="checkbox" class="filled-in" id="agentToggle" />
-          <span><b>Agent Mode</b> (show all tickets & allow status changes)</span>
+          <input type="checkbox" class="filled-in" id="adminToggle" />
+          <span><b>Admin Mode (Mr Oza)</b> — show all tickets & full moderation</span>
         </label>
-        <div class="input-field" id="agentPassWrap" style="display:none">
-          <input id="agentPass" type="password" />
-          <label for="agentPass">Agent passcode</label>
+        <div class="input-field" id="adminPassWrap" style="display:none">
+          <input id="adminPass" type="password" />
+          <label for="adminPass">Admin passcode</label>
+          <span class="grey-text text-darken-1" style="font-size:.9rem">Use: <b>MR-OZA-ADMIN-2025</b> (demo)</span>
         </div>
-        <div class="grey-text text-darken-1" style="font-size:.9rem">For classrooms/demos only. For production use proper Auth & role claims.</div>
+        <div class="grey-text text-darken-1" style="font-size:.9rem">For classroom/demo only. Real security is in Firestore rules.</div>
       </div>
     </div>
     <div class="modal-footer">
@@ -227,17 +217,19 @@
     </div>
   </div>
 
-  <!-- Materialize JS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 
-  <!-- Firebase v10 (Modular) + Analytics -->
+  <!-- Firebase v10 (Modular) -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js';
     import { getAnalytics, isSupported } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-analytics.js';
     import { getAuth, signInAnonymously, onAuthStateChanged, updateProfile } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js';
-    import { getFirestore, collection, addDoc, doc, updateDoc, serverTimestamp, query, orderBy, onSnapshot, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js';
+    import {
+      getFirestore, collection, addDoc, doc, updateDoc, serverTimestamp,
+      query, orderBy, onSnapshot, getDoc, getDocs, deleteDoc
+    } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js';
 
-    // ==== Firebase Config (your project) ====
+    // === Your Firebase project ===
     const firebaseConfig = {
       apiKey: "AIzaSyD4vP74YleiqqpVyIZzCQLqcjWIkcrzlxo",
       authDomain: "mr-oza-helpdesk.firebaseapp.com",
@@ -248,86 +240,88 @@
       measurementId: "G-PC18TN83WD"
     };
 
+    // ====== App state ======
     let app, auth, db, user, unsubTickets=null, unsubMessages=null;
+    const $ = s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+    const toast=(m,c='')=>M.toast({html:m,displayLength:2400,classes:c});
+    const chip=s=>{const m={open:['OPEN','chip-open'],progress:['IN PROGRESS','chip-progress'],closed:['CLOSED','chip-closed']};return `<span class="status-chip ${m[s]?.[1]||'chip-open'}">${m[s]?.[0]||'OPEN'}</span>`};
+    const escapeHtml=str=>String(str).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[ch]));
+    const tsToDate=ts=>!ts?null:(ts.toDate?ts.toDate():(typeof ts.seconds==='number'?new Date(ts.seconds*1000):null));
+    const fmtRel=d=>{if(!d) return ''; const s=(Date.now()-d.getTime())/1000; if(s<45) return 'just now'; if(s<3600) return Math.floor(s/60)+'m'; if(s<86400) return Math.floor(s/3600)+'h'; return d.toLocaleDateString();};
 
-    // Small helpers
-    const $ = s=>document.querySelector(s);
-    const $$ = s=>Array.from(document.querySelectorAll(s));
-    const toast = (m,c='')=> M.toast({html:m, displayLength:2400, classes:c});
-    const chip = s => {
-      const m = {open:['OPEN','chip-open'], progress:['IN PROGRESS','chip-progress'], closed:['CLOSED','chip-closed']};
-      return `<span class="status-chip ${m[s]?.[1]||'chip-open'}">${m[s]?.[0]||'OPEN'}</span>`;
-    };
-    function escapeHtml(str){ return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s])); }
-    function tsToDate(ts){ if(!ts) return null; if (ts.toDate) return ts.toDate(); if (typeof ts.seconds==='number') return new Date(ts.seconds*1000); return null; }
-    function fmtRel(d){ if(!d) return ''; const s=(Date.now()-d.getTime())/1000; if(s<45) return 'just now'; if(s<3600) return Math.floor(s/60)+'m'; if(s<86400) return Math.floor(s/3600)+'h'; return d.toLocaleDateString(); }
-
+    const ADMIN_PASS = 'MR-OZA-ADMIN-2025';
     let state = {
-      mode:'user',                         // 'user' | 'agent'
-      agentPass:'OZA2025',                 // demo passcode
+      mode: 'user',                      // 'user' | 'admin'
       displayName: localStorage.getItem('hd_name') || '',
       emailHint: localStorage.getItem('hd_email') || '',
-      activeTicketId:null, activeTicket:null,
+      activeTicketId: null, activeTicket: null
     };
 
-    // ==== Materialize init ====
+    // ====== UI boot ======
     document.addEventListener('DOMContentLoaded', ()=>{
-      const modalNew = M.Modal.init($('#modalNew'), { onOpenStart: ()=> M.FormSelect.init($$('select')) });
-      const modalProf= M.Modal.init($('#modalProfile'));
+      M.Modal.init($('#modalNew'), {onOpenStart: ()=> M.FormSelect.init($$('select'))});
+      M.Modal.init($('#modalProfile'));
       M.Tooltip.init($$('.tooltipped'));
-      if(!state.displayName) setTimeout(()=> modalProf.open(), 500);
+      if(!state.displayName) setTimeout(()=> M.Modal.getInstance($('#modalProfile')).open(), 500);
     });
+    $('#btnTheme').addEventListener('click', ()=>{ document.body.classList.toggle('blue-grey'); toast('Theme toggled'); });
 
-    // Light/dark
-    $('#btnTheme').addEventListener('click', ()=>{
-      document.body.classList.toggle('blue-grey');
-      toast('Theme toggled');
-    });
-
-    // ==== Firebase boot + Analytics ====
+    // ====== Firebase boot + Analytics ======
     (async function(){
       try{
         app = initializeApp(firebaseConfig);
-        try { const ok = await isSupported(); if (ok) getAnalytics(app); } catch {}
-        auth = getAuth(app);
-        db = getFirestore(app);
+        try{ if(await isSupported()) getAnalytics(app); }catch(e){}
+        auth = getAuth(app); db = getFirestore(app);
         await signInAnonymously(auth);
         onAuthStateChanged(auth, async u=>{
-          if(!u) return;
-          user = u;
-          if(state.displayName){ try{ await updateProfile(user,{displayName:state.displayName}); }catch{} }
-          bindUI();
-          loadTickets();
+          if(!u) return; user=u;
+          if(state.displayName){ try{ await updateProfile(user,{displayName:state.displayName}); }catch(e){} }
+          bindUI(); loadTickets();
         });
       }catch(err){ console.error(err); toast('Init failed','red'); }
     })();
 
-    // ==== UI Bindings ====
+    // ====== Helpers ======
+    const canModerateTicket = (t) => state.mode==='admin' || (t?.creatorUid && t.creatorUid === user?.uid);
+
+    // ====== Bind events ======
     function bindUI(){
       $('#fabNew').addEventListener('click', ()=> M.Modal.getInstance($('#modalNew')).open());
       $('#createTicket').addEventListener('click', createTicket);
       $('#btnProfile').addEventListener('click', ()=>{
         $('#displayName').value = state.displayName; M.updateTextFields();
         $('#emailHint').value = state.emailHint; M.updateTextFields();
-        $('#agentToggle').checked = (state.mode==='agent');
-        $('#agentPassWrap').style.display = $('#agentToggle').checked ? 'block' : 'none';
+        $('#adminToggle').checked = (state.mode==='admin');
+        $('#adminPassWrap').style.display = $('#adminToggle').checked ? 'block' : 'none';
         M.Modal.getInstance($('#modalProfile')).open();
       });
-      $('#agentToggle').addEventListener('change', e=> $('#agentPassWrap').style.display = e.target.checked ? 'block' : 'none');
+      $('#adminToggle').addEventListener('change', e=> $('#adminPassWrap').style.display = e.target.checked ? 'block' : 'none');
       $('#saveProfile').addEventListener('click', saveProfile);
       $('#refreshTickets').addEventListener('click', loadTickets);
       $('#seedData').addEventListener('click', seedDemo);
       $('#sendForm').addEventListener('submit', sendMessage);
       $('#msgInput').addEventListener('input', handleTyping);
-      $('#msgInput').addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); $('#sendForm').requestSubmit(); } });
+      $('#msgInput').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); $('#sendForm').requestSubmit(); } });
       $('#statusSelect').addEventListener('change', async e=>{
         if(!state.activeTicketId) return;
         try{ await updateDoc(doc(db,'tickets',state.activeTicketId), {status:e.target.value}); toast('Status updated'); }
         catch(err){ toast(err.message,'red'); }
       });
+      $('#closeTicketBtn').addEventListener('click', toggleCloseTicket);
+      $('#deleteTicketBtn').addEventListener('click', deleteTicket);
+
+      // message delete (event delegation)
+      $('#messages').addEventListener('click', async (e)=>{
+        const btn = e.target.closest('.bubble-actions');
+        if(!btn || !state.activeTicketId) return;
+        const mid = btn.dataset.mid; if(!mid) return;
+        if(!confirm('Delete this message?')) return;
+        try{ await deleteDoc(doc(db,'tickets',state.activeTicketId,'messages',mid)); toast('Message deleted'); }
+        catch(err){ toast(err.message,'red'); }
+      });
     }
 
-    // ==== Tickets ====
+    // ====== Tickets list ======
     function ticketItemTemplate(t){
       const lastAt = fmtRel(tsToDate(t.lastAt));
       const lastMsg = escapeHtml(t.lastMessage||'');
@@ -355,19 +349,20 @@
       const qAll = query(collection(db,'tickets'), orderBy('createdAt','desc'));
       unsubTickets = onSnapshot(qAll, snap=>{
         const items = [];
-        snap.forEach(docu=>{
-          const t = { id: docu.id, ...docu.data() };
-          if(state.mode==='agent' || t.creatorUid===user?.uid) items.push(ticketItemTemplate(t));
+        snap.forEach(d=>{
+          const t = { id:d.id, ...d.data() };
+          if(state.mode==='admin' || t.creatorUid===user?.uid) items.push(ticketItemTemplate(t));
         });
         $('#ticketList').innerHTML = items.join('') || '<li class="collection-item">No tickets yet. Click + to create one, or press Demo.</li>';
         $$('#ticketList .ticket-item').forEach(li=> li.addEventListener('click', ()=> openTicket(li.dataset.id)) );
       }, err=> toast(err.message,'red'));
 
-      const badge = $('#modeBadge');
-      if(state.mode==='agent'){ badge.classList.remove('green'); badge.classList.add('blue'); badge.setAttribute('data-badge-caption','Agent'); $('#statusSelect').style.display='block'; }
-      else { badge.classList.remove('blue'); badge.classList.add('green'); badge.setAttribute('data-badge-caption','User'); $('#statusSelect').style.display='none'; }
+      const b = $('#modeBadge');
+      if(state.mode==='admin'){ b.classList.remove('green'); b.classList.add('red'); b.setAttribute('data-badge-caption','Admin'); $('#statusSelect').style.display='block'; }
+      else { b.classList.remove('red'); b.classList.add('green'); b.setAttribute('data-badge-caption','User'); $('#statusSelect').style.display='none'; }
     }
 
+    // ====== Create / open ticket ======
     async function createTicket(){
       const subject = $('#subject').value.trim();
       const category = $('#category').value;
@@ -376,7 +371,7 @@
       try{
         const ref = await addDoc(collection(db,'tickets'),{
           subject, category, details, status:'open', priority:'normal',
-          lastMessage: '', lastAt: serverTimestamp(),
+          lastMessage:'', lastAt: serverTimestamp(),
           creatorUid: user?.uid || null, creatorName: state.displayName || 'Anonymous',
           createdAt: serverTimestamp()
         });
@@ -400,10 +395,12 @@
         const headerStatus = $('#headerStatus');
         headerStatus.style.display='inline-block';
         headerStatus.className = 'status-chip ' + (st==='open'?'chip-open': st==='progress'?'chip-progress':'chip-closed');
-        headerStatus.textContent = (st.toUpperCase()).replace('_',' ');
-        const isAgent = (state.mode==='agent');
-        $('#statusSelect').style.display = isAgent ? 'block' : 'none';
-        if(isAgent) $('#statusSelect').value = st;
+        headerStatus.textContent = st.toUpperCase();
+        const moderate = canModerateTicket(state.activeTicket);
+        $('#ticketActions').style.display = moderate ? 'flex' : 'none';
+        $('#closeTicketText').textContent = (st === 'closed') ? 'Reopen' : 'Close';
+        $('#statusSelect').style.display = state.mode==='admin' ? 'block' : 'none';
+        if(state.mode==='admin') $('#statusSelect').value = st;
       }catch(e){ toast(e.message,'red'); }
 
       const qMsgs = query(collection(db,'tickets',id,'messages'), orderBy('createdAt','asc'));
@@ -419,16 +416,22 @@
       });
     }
 
-    // ==== Messages ====
+    // ====== Messages ======
     function renderMessage(m){
-      const wrap = document.createElement('div');
       const mine = m.uid === user?.uid;
+      const canDelete = mine || state.mode==='admin';
       const ts = tsToDate(m.createdAt);
       const when = ts ? ts.toLocaleString() : '';
+      const wrap = document.createElement('div');
       wrap.className = 'bubble ' + (mine?'me':'them');
-      wrap.innerHTML = `${escapeHtml(m.text||'')}<div class="meta">${escapeHtml(m.name||'Anon')}${m.email? ' • '+escapeHtml(m.email): ''}${when? ' • '+escapeHtml(when):''}</div>`;
+      wrap.innerHTML = `
+        ${canDelete ? `<span class="bubble-actions" data-mid="${m.id}" title="Delete"><i class="material-icons">delete</i></span>` : ``}
+        ${escapeHtml(m.text||'')}
+        <div class="meta">${escapeHtml(m.name||'Anon')}${m.email? ' • '+escapeHtml(m.email): ''}${when? ' • '+escapeHtml(when):''}</div>
+      `;
       return wrap;
     }
+
     async function sendMessage(e){
       e.preventDefault();
       if(!state.activeTicketId){ toast('Select or create a ticket to chat.','orange'); return; }
@@ -436,36 +439,65 @@
       try{
         await addDoc(collection(db,'tickets',state.activeTicketId,'messages'),{
           uid:user?.uid||null, name: state.displayName||'Anonymous', email: state.emailHint||'',
-          role: state.mode==='agent' ? 'agent' : 'user',
+          role: state.mode==='admin' ? 'admin' : 'user',
           text, createdAt: serverTimestamp()
         });
-        // Update ticket history fields
-        await updateDoc(doc(db,'tickets',state.activeTicketId), {
-          lastMessage: text, lastAt: serverTimestamp()
-        });
+        await updateDoc(doc(db,'tickets',state.activeTicketId), { lastMessage:text, lastAt: serverTimestamp() });
         $('#msgInput').value='';
       }catch(err){ toast(err.message,'red'); }
     }
     let typingTimer=null;
-    function handleTyping(){ clearTimeout(typingTimer); $('#typing').style.display='flex'; typingTimer = setTimeout(()=> $('#typing').style.display='none', 900); }
+    function handleTyping(){ clearTimeout(typingTimer); $('#typing').style.display='flex'; typingTimer=setTimeout(()=> $('#typing').style.display='none', 900); }
 
-    // ==== Profile & Mode ====
+    // ====== Admin actions ======
+    async function toggleCloseTicket(){
+      if(!state.activeTicketId) return;
+      const cur = state.activeTicket?.status || 'open';
+      const next = (cur === 'closed') ? 'open' : 'closed';
+      try{
+        await updateDoc(doc(db,'tickets',state.activeTicketId), {
+          status: next, lastAt: serverTimestamp(),
+          lastMessage: next==='closed' ? 'Ticket closed' : 'Ticket reopened'
+        });
+        toast(next==='closed' ? 'Ticket closed' : 'Ticket reopened');
+      }catch(err){ toast(err.message,'red'); }
+    }
+
+    async function deleteTicket(){
+      if(!state.activeTicketId) return;
+      if(!confirm('Delete this ticket and ALL its messages?')) return;
+      try{
+        const snap = await getDocs(collection(db,'tickets',state.activeTicketId,'messages'));
+        for(const d of snap.docs){ await deleteDoc(d.ref); }
+        await deleteDoc(doc(db,'tickets',state.activeTicketId));
+        state.activeTicketId=null; state.activeTicket=null;
+        $('#messages').innerHTML=''; $('#headerSubject').innerText='No ticket selected';
+        $('#headerStatus').style.display='none'; $('#ticketActions').style.display='none';
+        toast('Ticket deleted');
+      }catch(err){ toast(err.message,'red'); }
+    }
+
+    // ====== Profile save ======
     async function saveProfile(){
       const name = $('#displayName').value.trim();
       const emailHint = $('#emailHint').value.trim();
-      const wantAgent = $('#agentToggle').checked;
-      if(name){ state.displayName = name; localStorage.setItem('hd_name',name); try{ await updateProfile(user,{displayName:name}); }catch{} }
-      state.emailHint = emailHint; localStorage.setItem('hd_email',emailHint);
-      if(wantAgent){
-        const pass = $('#agentPass').value.trim();
-        if(pass !== state.agentPass){ toast('Wrong agent passcode','red'); return; }
-        state.mode='agent';
-      } else { state.mode='user'; }
+      const wantAdmin = $('#adminToggle').checked;
+      if(name){ state.displayName=name; localStorage.setItem('hd_name',name); try{ await updateProfile(user,{displayName:name}); }catch(e){} }
+      state.emailHint=emailHint; localStorage.setItem('hd_email',emailHint);
+
+      if(wantAdmin){
+        const pass = $('#adminPass').value.trim();
+        if(pass !== ADMIN_PASS){ toast('Wrong admin passcode','red'); return; }
+        state.mode='admin';
+        if(!state.displayName) { state.displayName = 'Mr Oza'; localStorage.setItem('hd_name','Mr Oza'); }
+      } else {
+        state.mode='user';
+      }
       M.Modal.getInstance($('#modalProfile')).close();
       loadTickets(); toast('Profile updated');
     }
 
-    // ==== Demo data (optional) ====
+    // ====== Demo data ======
     async function seedDemo(){
       try{
         const t1 = await addDoc(collection(db,'tickets'),{
@@ -483,26 +515,11 @@
           createdAt: serverTimestamp(), lastMessage:'We will install by 4pm', lastAt: serverTimestamp()
         });
         await addDoc(collection(db,'tickets',t2.id,'messages'),{
-          uid:null, name:'Agent', text:'We will install by 4pm', createdAt: serverTimestamp()
+          uid:null, name:'Admin', text:'We will install by 4pm', createdAt: serverTimestamp()
         });
         toast('Demo tickets added');
       }catch(e){ toast(e.message,'red'); }
     }
   </script>
-
-  <!-- Firestore Rules (demo starter; set these in Firebase Console and harden later)
-  rules_version = '2';
-  service cloud.firestore {
-    match /databases/{database}/documents {
-      match /tickets/{ticketId} {
-        allow read: if true; // demo
-        allow create, update, delete: if request.auth != null;
-        match /messages/{messageId} {
-          allow read: if true;
-          allow create: if request.auth != null;
-        }
-      }
-    }
-  } -->
 </body>
 </html>
