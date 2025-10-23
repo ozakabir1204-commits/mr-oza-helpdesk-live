@@ -258,20 +258,22 @@
   <!-- bcryptjs (browser global) -->
   <script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
 
-  <!-- Firebase (modular) -->
+  <!-- Firebase (modular, CDN) + YOUR CONFIG & INIT -->
   <script type="module">
+    // Import the functions you need (CDN module URLs for plain index.html)
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js';
     import { getAnalytics, isSupported } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-analytics.js';
-    import { getAuth, signInAnonymously, onAuthStateChanged, updateProfile } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js';
+
+    // The app uses Auth and Firestore too:
+    import { getAuth, signInAnonymously, onAuthStateChanged, updateProfile }
+      from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js';
     import {
       getFirestore, collection, addDoc, doc, updateDoc, setDoc, serverTimestamp,
       query, orderBy, onSnapshot, getDoc, getDocs, deleteDoc
     } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js';
 
-    // --- SECURITY NOTE (for you): ---
-    // Client-side verification is convenient for classroom tools, but hashes are readable by clients.
-    // Use long random codes. For stronger security, move verification to Cloud Functions with custom claims.
-
+    // --- Your web app's Firebase configuration (from your snippet) ---
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
     const firebaseConfig = {
       apiKey: "AIzaSyD4vP74YleiqqpVyIZzCQLqcjWIkcrzlxo",
       authDomain: "mr-oza-helpdesk.firebaseapp.com",
@@ -282,13 +284,19 @@
       measurementId: "G-PC18TN83WD"
     };
 
+    // Initialize Firebase (exactly like your snippet)
+    const app = initializeApp(firebaseConfig);
+
+    // Initialize Analytics (guard so it won't throw on unsupported devices)
+    try { if (await isSupported()) { getAnalytics(app); } } catch (_) {}
+
     // ---- State / helpers ----
-    let app, auth, db, user, unsubTickets=null, unsubMessages=null;
+    let auth, db, user, unsubTickets=null, unsubMessages=null;
     const BCRYPT = window.dcodeIO?.bcrypt || window.bcrypt;
     const $ = s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
     const toast=(m,c='')=>M.toast({html:m,displayLength:2400,classes:c});
     const chip=s=>{const m={open:['OPEN','chip-open'],progress:['IN PROGRESS','chip-progress'],closed:['CLOSED','chip-closed']};return `<span class="status-chip ${m[s]?.[1]||'chip-open'}">${m[s]?.[0]||'OPEN'}</span>`};
-    const escapeHtml=str=>String(str).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[ch]));
+    const escapeHtml = str => String(str).replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]));
     const tsToDate=ts=>!ts?null:(ts.toDate?ts.toDate():(typeof ts.seconds==='number'?new Date(ts.seconds*1000):null));
     const fmtRel=d=>{if(!d) return ''; const s=(Date.now()-d.getTime())/1000; if(s<45) return 'just now'; if(s<3600) return Math.floor(s/60)+'m'; if(s<86400) return Math.floor(s/3600)+'h'; return d.toLocaleDateString();};
 
@@ -313,8 +321,6 @@
 
     (async function(){
       try{
-        app = initializeApp(firebaseConfig);
-        try{ if(await isSupported()) getAnalytics(app); }catch(e){}
         auth = getAuth(app); db = getFirestore(app);
         await signInAnonymously(auth);
         onAuthStateChanged(auth, async u=>{
@@ -350,7 +356,7 @@
         badge.setAttribute('data-badge-caption','User');
         $('#roleText').textContent='User';
         $('#statusSelect').style.display='none';
-        // If first run (no codes yet), we allow showing the codes button so the first person can set them.
+        // If first run (no codes yet), show the codes button so the first person can set them.
         $('#btnCodes').style.display = state.firstRun ? 'inline-block' : 'none';
       }
     }
@@ -398,9 +404,7 @@
     async function saveCodes(){
       const u = $('#newUserCode').value.trim();
       const a = $('#newAdminCode').value.trim();
-      if(!u && !a){
-        toast('Nothing to save'); return;
-      }
+      if(!u && !a){ toast('Nothing to save'); return; }
       if(a && a.length < 8){ toast('Admin code must be at least 8 characters','orange'); return; }
 
       try{
@@ -506,7 +510,7 @@
       $('#enterAsAdmin').addEventListener('click', verifyAdminCode);
     }
 
-    // ----- Tickets / Chat (unchanged core) -----
+    // ----- Tickets / Chat -----
     function ticketItemTemplate(t){
       const lastAt = fmtRel(tsToDate(t.lastAt));
       const lastMsg = escapeHtml(t.lastMessage||'');
@@ -656,15 +660,6 @@
       }catch(err){ toast(err.message,'red'); }
     }
 
-    async function saveProfile(){
-      const name = $('#displayName').value.trim();
-      const emailHint = $('#emailHint').value.trim();
-      if(name){ state.displayName=name; localStorage.setItem('hd_name',name); try{ await updateProfile(user,{displayName:name}); }catch(e){} }
-      state.emailHint=emailHint; localStorage.setItem('hd_email',emailHint);
-      M.Modal.getInstance($('#modalProfile')).close();
-      toast('Profile updated');
-    }
-
     async function seedDemo(){
       if(needUserGate()){ M.Modal.getInstance($('#modalGate')).open(); return; }
       try{
@@ -689,10 +684,12 @@
       }catch(e){ toast(e.message,'red'); }
     }
 
-    // Buttons inside modals
-    $('#saveCodes').addEventListener('click', saveCodes);
-    $('#enterAsUser').addEventListener('click', verifyUserCode);
-    $('#enterAsAdmin').addEventListener('click', verifyAdminCode);
+    // Safety: make code buttons work even if bindUI hasn't run yet
+    document.addEventListener('click', (e)=>{
+      if(e.target && e.target.id === 'saveCodes') saveCodes();
+      if(e.target && e.target.id === 'enterAsUser') verifyUserCode();
+      if(e.target && e.target.id === 'enterAsAdmin') verifyAdminCode();
+    });
   </script>
 </body>
 </html>
