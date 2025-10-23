@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MR.Oza ALL COMPUTER CLASS AND AOIT CLASS</title>
   <meta name="description" content="Live Helpdesk with Material Design UI, animated 3D title, and realtime chat with history. Developed by Mr OZA." />
+  <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Materialize CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
   <style>
     :root{ --brandA:#2196f3; --brandB:#26a69a; --bg-grad:linear-gradient(135deg,var(--brandA),var(--brandB));
@@ -65,13 +67,17 @@
 
     .badge-mini{font-size:.72rem;border-radius:8px;padding:2px 6px;background:#eceff1}
     .footer-note{font-size:.85rem;opacity:.75;padding:8px 0 16px}
+
+    /* Gate & codes modal minor tweaks */
+    .code-hint{font-size:.85rem;opacity:.75}
   </style>
 </head>
 <body>
   <nav class="appbar">
     <div class="nav-wrapper container">
       <a href="#" class="brand-logo">Helpdesk <span class="subtle">Live</span></a>
-      <ul class="right hide-on-med-and-down">
+      <ul class="right hide-on-med-and-down" style="display:flex;align-items:center;gap:6px">
+        <li><a id="btnCodes" style="display:none" class="tooltipped" data-position="bottom" data-tooltip="Manage access codes"><i class="material-icons">admin_panel_settings</i></a></li>
         <li><a id="btnProfile" class="tooltipped" data-position="bottom" data-tooltip="Profile"><i class="material-icons">manage_accounts</i></a></li>
         <li><a id="btnTheme" class="tooltipped" data-position="bottom" data-tooltip="Toggle light/dark"><i class="material-icons">brightness_6</i></a></li>
       </ul>
@@ -196,11 +202,61 @@
       <div class="grey-text text-darken-1" style="font-size:.9rem">
         Role: <b><span id="roleText">User</span></b>
       </div>
+      <div class="section">
+        <a id="openGateFromProfile" class="btn-flat"><i class="material-icons left">vpn_key</i>Enter / Change Role</a>
+      </div>
     </div>
     <div class="modal-footer"><a href="#!" class="modal-close btn-flat">Close</a><a id="saveProfile" class="btn">Save</a></div>
   </div>
 
+  <!-- Modal: Access Gate (User/Admin codes) -->
+  <div id="modalGate" class="modal">
+    <div class="modal-content">
+      <h5><i class="material-icons">lock</i> Access</h5>
+      <p class="code-hint">Enter the <b>User code</b> to join chats, or the <b>Admin code</b> to manage tickets.</p>
+      <div class="row" style="margin-top:10px">
+        <div class="input-field col s12 m6">
+          <input id="userCode" type="password" minlength="4" autocomplete="off" />
+          <label for="userCode">User code</label>
+          <a id="enterAsUser" class="btn waves-effect" style="margin-top:6px"><i class="material-icons left">login</i>Enter as User</a>
+        </div>
+        <div class="input-field col s12 m6">
+          <input id="adminCode" type="password" minlength="8" autocomplete="off" />
+          <label for="adminCode">Admin code</label>
+          <a id="enterAsAdmin" class="btn red waves-effect" style="margin-top:6px"><i class="material-icons left">security</i>Enter as Admin</a>
+        </div>
+      </div>
+      <p id="firstRunNote" class="code-hint" style="display:none"><i class="material-icons tiny">info</i> First-time setup: click the shield icon in the top bar to set both codes.</p>
+    </div>
+    <div class="modal-footer"><a href="#!" class="modal-close btn-flat">Close</a></div>
+  </div>
+
+  <!-- Modal: Manage Codes (Admin only or first-run) -->
+  <div id="modalCodes" class="modal">
+    <div class="modal-content">
+      <h5><i class="material-icons">admin_panel_settings</i> Set Access Codes</h5>
+      <p class="code-hint">Codes are <b>hashed with bcrypt</b> and stored in Firestore. Use long, hard-to-guess codes. Leave blank to keep existing.</p>
+      <div class="row" style="margin-top:12px">
+        <div class="input-field col s12 m6">
+          <input id="newUserCode" type="password" minlength="4" autocomplete="off" />
+          <label for="newUserCode">New User code</label>
+        </div>
+        <div class="input-field col s12 m6">
+          <input id="newAdminCode" type="password" minlength="8" autocomplete="off" />
+          <label for="newAdminCode">New Admin code</label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a id="saveCodes" class="btn"><i class="material-icons left">save</i>Save</a>
+      <a href="#!" class="modal-close btn-flat">Close</a>
+    </div>
+  </div>
+
+  <!-- Materialize JS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  <!-- bcryptjs (browser global) -->
+  <script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
 
   <!-- Firebase (modular) -->
   <script type="module">
@@ -208,9 +264,13 @@
     import { getAnalytics, isSupported } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-analytics.js';
     import { getAuth, signInAnonymously, onAuthStateChanged, updateProfile } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js';
     import {
-      getFirestore, collection, addDoc, doc, updateDoc, serverTimestamp,
+      getFirestore, collection, addDoc, doc, updateDoc, setDoc, serverTimestamp,
       query, orderBy, onSnapshot, getDoc, getDocs, deleteDoc
     } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js';
+
+    // --- SECURITY NOTE (for you): ---
+    // Client-side verification is convenient for classroom tools, but hashes are readable by clients.
+    // Use long random codes. For stronger security, move verification to Cloud Functions with custom claims.
 
     const firebaseConfig = {
       apiKey: "AIzaSyD4vP74YleiqqpVyIZzCQLqcjWIkcrzlxo",
@@ -224,6 +284,7 @@
 
     // ---- State / helpers ----
     let app, auth, db, user, unsubTickets=null, unsubMessages=null;
+    const BCRYPT = window.dcodeIO?.bcrypt || window.bcrypt;
     const $ = s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
     const toast=(m,c='')=>M.toast({html:m,displayLength:2400,classes:c});
     const chip=s=>{const m={open:['OPEN','chip-open'],progress:['IN PROGRESS','chip-progress'],closed:['CLOSED','chip-closed']};return `<span class="status-chip ${m[s]?.[1]||'chip-open'}">${m[s]?.[0]||'OPEN'}</span>`};
@@ -235,14 +296,18 @@
       isAdmin:false,
       displayName:localStorage.getItem('hd_name')||'',
       emailHint:localStorage.getItem('hd_email')||'',
-      activeTicketId:null, activeTicket:null
+      activeTicketId:null, activeTicket:null,
+      joinCodes:null,          // { userHash, adminHash }
+      firstRun:false           // true when codes doc missing
     };
 
     document.addEventListener('DOMContentLoaded', ()=>{
       M.Modal.init($('#modalNew'), {onOpenStart: ()=> M.FormSelect.init($$('select'))});
       M.Modal.init($('#modalProfile'));
+      M.Modal.init($('#modalGate'));
+      M.Modal.init($('#modalCodes'));
       M.Tooltip.init($$('.tooltipped'));
-      if(!state.displayName) setTimeout(()=> M.Modal.getInstance($('#modalProfile')).open(), 500);
+      if(!state.displayName) setTimeout(()=> M.Modal.getInstance($('#modalProfile')).open(), 600);
     });
     $('#btnTheme').addEventListener('click', ()=>{ document.body.classList.toggle('blue-grey'); toast('Theme toggled'); });
 
@@ -255,12 +320,15 @@
         onAuthStateChanged(auth, async u=>{
           if(!u) return; user=u;
           if(state.displayName){ try{ await updateProfile(user,{displayName:state.displayName}); }catch(e){} }
-          await computeRole();   // <- determine Admin/User from Firestore
+          await computeRole();      // from admins collection
+          await ensureJoinCodes();  // load or set first-run
+          await gateFlow();         // require user/admin code
           bindUI(); loadTickets();
         });
       }catch(err){ console.error(err); toast('Init failed','red'); }
     })();
 
+    // ----- Role / Admin -----
     async function computeRole(){
       state.isAdmin = false;
       try{
@@ -271,19 +339,146 @@
     }
     function updateRoleUI(){
       const badge = $('#modeBadge');
-      if(state.isAdmin){ badge.classList.remove('green'); badge.classList.add('red'); badge.setAttribute('data-badge-caption','Admin'); $('#roleText').textContent='Admin'; $('#statusSelect').style.display='block'; }
-      else{ badge.classList.remove('red'); badge.classList.add('green'); badge.setAttribute('data-badge-caption','User'); $('#roleText').textContent='User'; $('#statusSelect').style.display='none'; }
+      if(state.isAdmin){
+        badge.classList.remove('green'); badge.classList.add('red');
+        badge.setAttribute('data-badge-caption','Admin');
+        $('#roleText').textContent='Admin';
+        $('#statusSelect').style.display='block';
+        $('#btnCodes').style.display='inline-block';
+      }else{
+        badge.classList.remove('red'); badge.classList.add('green');
+        badge.setAttribute('data-badge-caption','User');
+        $('#roleText').textContent='User';
+        $('#statusSelect').style.display='none';
+        // If first run (no codes yet), we allow showing the codes button so the first person can set them.
+        $('#btnCodes').style.display = state.firstRun ? 'inline-block' : 'none';
+      }
     }
 
+    async function grantAdmin(){
+      try{
+        await setDoc(doc(db,'admins', user.uid), {
+          createdAt: serverTimestamp(),
+          name: state.displayName || 'Anonymous',
+          email: state.emailHint || ''
+        });
+        await computeRole();
+        toast('Admin access granted ✅','');
+      }catch(err){ toast(err.message,'red'); }
+    }
+
+    // ----- Join Codes (User/Admin) -----
+    async function ensureJoinCodes(){
+      try{
+        const ref = doc(db,'config','joinCodes');
+        const snap = await getDoc(ref);
+        if(!snap.exists()){
+          state.firstRun = true; state.joinCodes = { userHash:null, adminHash:null };
+          $('#firstRunNote').style.display='block';
+          // Let the first visitor set codes
+          M.Modal.getInstance($('#modalCodes')).open();
+        }else{
+          state.firstRun = false; state.joinCodes = snap.data();
+          $('#firstRunNote').style.display='none';
+        }
+        updateRoleUI();
+      }catch(err){
+        toast('Failed to load access config','red');
+      }
+    }
+
+    async function reloadJoinCodes(){
+      const ref = doc(db,'config','joinCodes');
+      const snap = await getDoc(ref);
+      state.joinCodes = snap.exists()? snap.data() : {userHash:null, adminHash:null};
+      state.firstRun = !snap.exists();
+      updateRoleUI();
+    }
+
+    async function saveCodes(){
+      const u = $('#newUserCode').value.trim();
+      const a = $('#newAdminCode').value.trim();
+      if(!u && !a){
+        toast('Nothing to save'); return;
+      }
+      if(a && a.length < 8){ toast('Admin code must be at least 8 characters','orange'); return; }
+
+      try{
+        const ref = doc(db,'config','joinCodes');
+        const existing = (await getDoc(ref)).data() || {};
+        const payload = {};
+        if(u) payload.userHash = BCRYPT.hashSync(u, 10);
+        if(a) payload.adminHash = BCRYPT.hashSync(a, 10);
+        await setDoc(ref, {...existing, ...payload});
+        $('#newUserCode').value=''; $('#newAdminCode').value=''; M.updateTextFields();
+        toast('Codes saved ✅');
+        await reloadJoinCodes();
+        state.firstRun = false;
+      }catch(err){ toast(err.message,'red'); }
+    }
+
+    function needUserGate(){
+      // If a userHash exists, require passing the user code once per browser.
+      return !!(state.joinCodes?.userHash) && localStorage.getItem('hd_user_gate_ok')!=='1';
+    }
+
+    async function gateFlow(){
+      // If admin already, allow; otherwise require user code when configured
+      if(state.isAdmin){ return; }
+      if(needUserGate()){
+        M.Modal.getInstance($('#modalGate')).open();
+      }
+    }
+
+    async function verifyUserCode(){
+      if(!state.joinCodes?.userHash){
+        toast('No User code is configured yet. Ask Admin to set it.','orange'); return;
+      }
+      const code = $('#userCode').value;
+      if(!code){ toast('Enter the User code','orange'); return; }
+      try{
+        const ok = BCRYPT.compareSync(code, state.joinCodes.userHash);
+        if(ok){
+          localStorage.setItem('hd_user_gate_ok','1');
+          toast('Access granted (User) ✅');
+          $('#userCode').value=''; M.updateTextFields();
+          M.Modal.getInstance($('#modalGate')).close();
+        }else{
+          toast('Incorrect User code','red');
+        }
+      }catch(e){ toast('Error verifying code','red'); }
+    }
+
+    async function verifyAdminCode(){
+      if(!state.joinCodes?.adminHash){
+        toast('No Admin code is configured yet. Set it first.','orange'); return;
+      }
+      const code = $('#adminCode').value;
+      if(!code){ toast('Enter the Admin code','orange'); return; }
+      try{
+        const ok = BCRYPT.compareSync(code, state.joinCodes.adminHash);
+        if(ok){
+          $('#adminCode').value=''; M.updateTextFields();
+          await grantAdmin();
+          M.Modal.getInstance($('#modalGate')).close();
+        }else{
+          toast('Incorrect Admin code','red');
+        }
+      }catch(e){ toast('Error verifying code','red'); }
+    }
+
+    // ----- UI Bindings -----
     function bindUI(){
       $('#fabNew').addEventListener('click', ()=> M.Modal.getInstance($('#modalNew')).open());
       $('#createTicket').addEventListener('click', createTicket);
+
       $('#btnProfile').addEventListener('click', ()=>{
         $('#displayName').value = state.displayName; M.updateTextFields();
         $('#emailHint').value = state.emailHint; M.updateTextFields();
         M.Modal.getInstance($('#modalProfile')).open();
       });
       $('#saveProfile').addEventListener('click', saveProfile);
+      $('#openGateFromProfile').addEventListener('click', ()=> M.Modal.getInstance($('#modalGate')).open());
       $('#refreshTickets').addEventListener('click', loadTickets);
       $('#seedData').addEventListener('click', seedDemo);
       $('#sendForm').addEventListener('submit', sendMessage);
@@ -303,8 +498,15 @@
         try{ await deleteDoc(doc(db,'tickets',state.activeTicketId,'messages',mid)); toast('Message deleted'); }
         catch(err){ toast(err.message,'red'); }
       });
+
+      // Codes & Gate
+      $('#btnCodes').addEventListener('click', ()=> M.Modal.getInstance($('#modalCodes')).open());
+      $('#saveCodes').addEventListener('click', saveCodes);
+      $('#enterAsUser').addEventListener('click', verifyUserCode);
+      $('#enterAsAdmin').addEventListener('click', verifyAdminCode);
     }
 
+    // ----- Tickets / Chat (unchanged core) -----
     function ticketItemTemplate(t){
       const lastAt = fmtRel(tsToDate(t.lastAt));
       const lastMsg = escapeHtml(t.lastMessage||'');
@@ -343,6 +545,7 @@
     }
 
     async function createTicket(){
+      if(needUserGate()){ M.Modal.getInstance($('#modalGate')).open(); return; }
       const subject = $('#subject').value.trim();
       const category = $('#category').value;
       const details = $('#details').value.trim();
@@ -361,6 +564,7 @@
     }
 
     async function openTicket(id){
+      if(needUserGate()){ M.Modal.getInstance($('#modalGate')).open(); return; }
       state.activeTicketId = id;
       $$('#ticketList .ticket-item').forEach(el=> el.classList.toggle('active-ticket', el.dataset.id===id));
       if(unsubMessages){ unsubMessages(); unsubMessages=null; }
@@ -411,6 +615,7 @@
 
     async function sendMessage(e){
       e.preventDefault();
+      if(needUserGate()){ M.Modal.getInstance($('#modalGate')).open(); return; }
       if(!state.activeTicketId){ toast('Select or create a ticket to chat.','orange'); return; }
       const text = $('#msgInput').value.trim(); if(!text) return;
       try{
@@ -419,7 +624,6 @@
           role: state.isAdmin ? 'admin' : 'user',
           text, createdAt: serverTimestamp()
         });
-        // this update may fail if you're not creator; it's OK (history is still in messages)
         try{ await updateDoc(doc(db,'tickets',state.activeTicketId), { lastMessage:text, lastAt: serverTimestamp() }); }catch(_){}
         $('#msgInput').value='';
       }catch(err){ toast(err.message,'red'); }
@@ -462,6 +666,7 @@
     }
 
     async function seedDemo(){
+      if(needUserGate()){ M.Modal.getInstance($('#modalGate')).open(); return; }
       try{
         const t1 = await addDoc(collection(db,'tickets'),{
           subject:'Wi-Fi not connecting', category:'Network', details:'Laptop keeps dropping campus Wi-Fi.',
@@ -483,6 +688,11 @@
         toast('Demo tickets added');
       }catch(e){ toast(e.message,'red'); }
     }
+
+    // Buttons inside modals
+    $('#saveCodes').addEventListener('click', saveCodes);
+    $('#enterAsUser').addEventListener('click', verifyUserCode);
+    $('#enterAsAdmin').addEventListener('click', verifyAdminCode);
   </script>
 </body>
 </html>
