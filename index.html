@@ -68,18 +68,16 @@
   </style>
 </head>
 <body>
-  <!-- App Bar -->
   <nav class="appbar">
     <div class="nav-wrapper container">
       <a href="#" class="brand-logo">Helpdesk <span class="subtle">Live</span></a>
       <ul class="right hide-on-med-and-down">
-        <li><a id="btnProfile" class="tooltipped" data-position="bottom" data-tooltip="Profile & Admin Mode"><i class="material-icons">manage_accounts</i></a></li>
+        <li><a id="btnProfile" class="tooltipped" data-position="bottom" data-tooltip="Profile"><i class="material-icons">manage_accounts</i></a></li>
         <li><a id="btnTheme" class="tooltipped" data-position="bottom" data-tooltip="Toggle light/dark"><i class="material-icons">brightness_6</i></a></li>
       </ul>
     </div>
   </nav>
 
-  <!-- 3D Title -->
   <section class="hero">
     <div class="container hero-wrap">
       <div class="title3d">MR.OZA ALL COMPUTER CLASSES AND AOIT CLASSES<div class="sheen"></div></div>
@@ -147,7 +145,7 @@
       </div>
     </div>
 
-    <!-- New ticket FAB -->
+    <!-- FAB: New ticket -->
     <div class="fixed-action-btn">
       <a id="fabNew" class="btn-floating btn-large teal tooltipped" data-position="left" data-tooltip="New Ticket"><i class="large material-icons">add</i></a>
     </div>
@@ -178,13 +176,10 @@
         </div>
       </div>
     </div>
-    <div class="modal-footer">
-      <a href="#!" class="modal-close btn-flat">Cancel</a>
-      <a id="createTicket" class="btn">Create</a>
-    </div>
+    <div class="modal-footer"><a href="#!" class="modal-close btn-flat">Cancel</a><a id="createTicket" class="btn">Create</a></div>
   </div>
 
-  <!-- Modal: Profile / Admin -->
+  <!-- Modal: Profile -->
   <div id="modalProfile" class="modal">
     <div class="modal-content">
       <h5><i class="material-icons">person</i> Profile</h5>
@@ -198,28 +193,16 @@
           <label for="emailHint" class="active">Email (optional)</label>
         </div>
       </div>
-      <div class="card blue-grey lighten-5 z-depth-0" style="padding:12px">
-        <label>
-          <input type="checkbox" class="filled-in" id="adminToggle" />
-          <span><b>Admin Mode (Mr Oza)</b> — show all tickets & full moderation</span>
-        </label>
-        <div class="input-field" id="adminPassWrap" style="display:none">
-          <input id="adminPass" type="password" />
-          <label for="adminPass">Admin passcode</label>
-          <span class="grey-text text-darken-1" style="font-size:.9rem">Use: <b>MR-OZA-ADMIN-2025</b> (demo)</span>
-        </div>
-        <div class="grey-text text-darken-1" style="font-size:.9rem">For classroom/demo only. Real security is in Firestore rules.</div>
+      <div class="grey-text text-darken-1" style="font-size:.9rem">
+        Role: <b><span id="roleText">User</span></b>
       </div>
     </div>
-    <div class="modal-footer">
-      <a href="#!" class="modal-close btn-flat">Close</a>
-      <a id="saveProfile" class="btn">Save</a>
-    </div>
+    <div class="modal-footer"><a href="#!" class="modal-close btn-flat">Close</a><a id="saveProfile" class="btn">Save</a></div>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 
-  <!-- Firebase v10 (Modular) -->
+  <!-- Firebase (modular) -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js';
     import { getAnalytics, isSupported } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-analytics.js';
@@ -229,7 +212,6 @@
       query, orderBy, onSnapshot, getDoc, getDocs, deleteDoc
     } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js';
 
-    // === Your Firebase project ===
     const firebaseConfig = {
       apiKey: "AIzaSyD4vP74YleiqqpVyIZzCQLqcjWIkcrzlxo",
       authDomain: "mr-oza-helpdesk.firebaseapp.com",
@@ -240,7 +222,7 @@
       measurementId: "G-PC18TN83WD"
     };
 
-    // ====== App state ======
+    // ---- State / helpers ----
     let app, auth, db, user, unsubTickets=null, unsubMessages=null;
     const $ = s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
     const toast=(m,c='')=>M.toast({html:m,displayLength:2400,classes:c});
@@ -249,15 +231,13 @@
     const tsToDate=ts=>!ts?null:(ts.toDate?ts.toDate():(typeof ts.seconds==='number'?new Date(ts.seconds*1000):null));
     const fmtRel=d=>{if(!d) return ''; const s=(Date.now()-d.getTime())/1000; if(s<45) return 'just now'; if(s<3600) return Math.floor(s/60)+'m'; if(s<86400) return Math.floor(s/3600)+'h'; return d.toLocaleDateString();};
 
-    const ADMIN_PASS = 'MR-OZA-ADMIN-2025';
-    let state = {
-      mode: 'user',                      // 'user' | 'admin'
-      displayName: localStorage.getItem('hd_name') || '',
-      emailHint: localStorage.getItem('hd_email') || '',
-      activeTicketId: null, activeTicket: null
+    const state = {
+      isAdmin:false,
+      displayName:localStorage.getItem('hd_name')||'',
+      emailHint:localStorage.getItem('hd_email')||'',
+      activeTicketId:null, activeTicket:null
     };
 
-    // ====== UI boot ======
     document.addEventListener('DOMContentLoaded', ()=>{
       M.Modal.init($('#modalNew'), {onOpenStart: ()=> M.FormSelect.init($$('select'))});
       M.Modal.init($('#modalProfile'));
@@ -266,7 +246,6 @@
     });
     $('#btnTheme').addEventListener('click', ()=>{ document.body.classList.toggle('blue-grey'); toast('Theme toggled'); });
 
-    // ====== Firebase boot + Analytics ======
     (async function(){
       try{
         app = initializeApp(firebaseConfig);
@@ -276,31 +255,39 @@
         onAuthStateChanged(auth, async u=>{
           if(!u) return; user=u;
           if(state.displayName){ try{ await updateProfile(user,{displayName:state.displayName}); }catch(e){} }
+          await computeRole();   // <- determine Admin/User from Firestore
           bindUI(); loadTickets();
         });
       }catch(err){ console.error(err); toast('Init failed','red'); }
     })();
 
-    // ====== Helpers ======
-    const canModerateTicket = (t) => state.mode==='admin' || (t?.creatorUid && t.creatorUid === user?.uid);
+    async function computeRole(){
+      state.isAdmin = false;
+      try{
+        const d = await getDoc(doc(db,'admins', user.uid));
+        state.isAdmin = d.exists();
+      }catch(e){ state.isAdmin = false; }
+      updateRoleUI();
+    }
+    function updateRoleUI(){
+      const badge = $('#modeBadge');
+      if(state.isAdmin){ badge.classList.remove('green'); badge.classList.add('red'); badge.setAttribute('data-badge-caption','Admin'); $('#roleText').textContent='Admin'; $('#statusSelect').style.display='block'; }
+      else{ badge.classList.remove('red'); badge.classList.add('green'); badge.setAttribute('data-badge-caption','User'); $('#roleText').textContent='User'; $('#statusSelect').style.display='none'; }
+    }
 
-    // ====== Bind events ======
     function bindUI(){
       $('#fabNew').addEventListener('click', ()=> M.Modal.getInstance($('#modalNew')).open());
       $('#createTicket').addEventListener('click', createTicket);
       $('#btnProfile').addEventListener('click', ()=>{
         $('#displayName').value = state.displayName; M.updateTextFields();
         $('#emailHint').value = state.emailHint; M.updateTextFields();
-        $('#adminToggle').checked = (state.mode==='admin');
-        $('#adminPassWrap').style.display = $('#adminToggle').checked ? 'block' : 'none';
         M.Modal.getInstance($('#modalProfile')).open();
       });
-      $('#adminToggle').addEventListener('change', e=> $('#adminPassWrap').style.display = e.target.checked ? 'block' : 'none');
       $('#saveProfile').addEventListener('click', saveProfile);
       $('#refreshTickets').addEventListener('click', loadTickets);
       $('#seedData').addEventListener('click', seedDemo);
       $('#sendForm').addEventListener('submit', sendMessage);
-      $('#msgInput').addEventListener('input', handleTyping);
+      $('#msgInput').addEventListener('input', ()=>{ clearTimeout(window.__tt); $('#typing').style.display='flex'; window.__tt=setTimeout(()=>$('#typing').style.display='none',900) });
       $('#msgInput').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); $('#sendForm').requestSubmit(); } });
       $('#statusSelect').addEventListener('change', async e=>{
         if(!state.activeTicketId) return;
@@ -309,11 +296,8 @@
       });
       $('#closeTicketBtn').addEventListener('click', toggleCloseTicket);
       $('#deleteTicketBtn').addEventListener('click', deleteTicket);
-
-      // message delete (event delegation)
       $('#messages').addEventListener('click', async (e)=>{
-        const btn = e.target.closest('.bubble-actions');
-        if(!btn || !state.activeTicketId) return;
+        const btn = e.target.closest('.bubble-actions'); if(!btn || !state.activeTicketId) return;
         const mid = btn.dataset.mid; if(!mid) return;
         if(!confirm('Delete this message?')) return;
         try{ await deleteDoc(doc(db,'tickets',state.activeTicketId,'messages',mid)); toast('Message deleted'); }
@@ -321,7 +305,6 @@
       });
     }
 
-    // ====== Tickets list ======
     function ticketItemTemplate(t){
       const lastAt = fmtRel(tsToDate(t.lastAt));
       const lastMsg = escapeHtml(t.lastMessage||'');
@@ -351,18 +334,14 @@
         const items = [];
         snap.forEach(d=>{
           const t = { id:d.id, ...d.data() };
-          if(state.mode==='admin' || t.creatorUid===user?.uid) items.push(ticketItemTemplate(t));
+          if(state.isAdmin || t.creatorUid===user?.uid) items.push(ticketItemTemplate(t));
         });
         $('#ticketList').innerHTML = items.join('') || '<li class="collection-item">No tickets yet. Click + to create one, or press Demo.</li>';
         $$('#ticketList .ticket-item').forEach(li=> li.addEventListener('click', ()=> openTicket(li.dataset.id)) );
       }, err=> toast(err.message,'red'));
-
-      const b = $('#modeBadge');
-      if(state.mode==='admin'){ b.classList.remove('green'); b.classList.add('red'); b.setAttribute('data-badge-caption','Admin'); $('#statusSelect').style.display='block'; }
-      else { b.classList.remove('red'); b.classList.add('green'); b.setAttribute('data-badge-caption','User'); $('#statusSelect').style.display='none'; }
+      updateRoleUI();
     }
 
-    // ====== Create / open ticket ======
     async function createTicket(){
       const subject = $('#subject').value.trim();
       const category = $('#category').value;
@@ -396,30 +375,28 @@
         headerStatus.style.display='inline-block';
         headerStatus.className = 'status-chip ' + (st==='open'?'chip-open': st==='progress'?'chip-progress':'chip-closed');
         headerStatus.textContent = st.toUpperCase();
-        const moderate = canModerateTicket(state.activeTicket);
-        $('#ticketActions').style.display = moderate ? 'flex' : 'none';
+
+        const canModerate = state.isAdmin || (state.activeTicket.creatorUid === user?.uid);
+        $('#ticketActions').style.display = canModerate ? 'flex' : 'none';
         $('#closeTicketText').textContent = (st === 'closed') ? 'Reopen' : 'Close';
-        $('#statusSelect').style.display = state.mode==='admin' ? 'block' : 'none';
-        if(state.mode==='admin') $('#statusSelect').value = st;
+        $('#statusSelect').style.display = state.isAdmin ? 'block' : 'none';
+        if(state.isAdmin) $('#statusSelect').value = st;
       }catch(e){ toast(e.message,'red'); }
 
       const qMsgs = query(collection(db,'tickets',id,'messages'), orderBy('createdAt','asc'));
       unsubMessages = onSnapshot(qMsgs, snap=>{
         const frag = document.createDocumentFragment();
         snap.docChanges().forEach(ch=>{
-          if(ch.type==='added'){
-            frag.appendChild(renderMessage({ id: ch.doc.id, ...ch.doc.data() }));
-          }
+          if(ch.type==='added'){ frag.appendChild(renderMessage({ id: ch.doc.id, ...ch.doc.data() })); }
         });
         $('#messages').appendChild(frag);
         const pane = $('#chatPane'); pane.scrollTop = pane.scrollHeight;
       });
     }
 
-    // ====== Messages ======
     function renderMessage(m){
       const mine = m.uid === user?.uid;
-      const canDelete = mine || state.mode==='admin';
+      const canDelete = mine || state.isAdmin;
       const ts = tsToDate(m.createdAt);
       const when = ts ? ts.toLocaleString() : '';
       const wrap = document.createElement('div');
@@ -439,17 +416,15 @@
       try{
         await addDoc(collection(db,'tickets',state.activeTicketId,'messages'),{
           uid:user?.uid||null, name: state.displayName||'Anonymous', email: state.emailHint||'',
-          role: state.mode==='admin' ? 'admin' : 'user',
+          role: state.isAdmin ? 'admin' : 'user',
           text, createdAt: serverTimestamp()
         });
-        await updateDoc(doc(db,'tickets',state.activeTicketId), { lastMessage:text, lastAt: serverTimestamp() });
+        // this update may fail if you're not creator; it's OK (history is still in messages)
+        try{ await updateDoc(doc(db,'tickets',state.activeTicketId), { lastMessage:text, lastAt: serverTimestamp() }); }catch(_){}
         $('#msgInput').value='';
       }catch(err){ toast(err.message,'red'); }
     }
-    let typingTimer=null;
-    function handleTyping(){ clearTimeout(typingTimer); $('#typing').style.display='flex'; typingTimer=setTimeout(()=> $('#typing').style.display='none', 900); }
 
-    // ====== Admin actions ======
     async function toggleCloseTicket(){
       if(!state.activeTicketId) return;
       const cur = state.activeTicket?.status || 'open';
@@ -477,27 +452,15 @@
       }catch(err){ toast(err.message,'red'); }
     }
 
-    // ====== Profile save ======
     async function saveProfile(){
       const name = $('#displayName').value.trim();
       const emailHint = $('#emailHint').value.trim();
-      const wantAdmin = $('#adminToggle').checked;
       if(name){ state.displayName=name; localStorage.setItem('hd_name',name); try{ await updateProfile(user,{displayName:name}); }catch(e){} }
       state.emailHint=emailHint; localStorage.setItem('hd_email',emailHint);
-
-      if(wantAdmin){
-        const pass = $('#adminPass').value.trim();
-        if(pass !== ADMIN_PASS){ toast('Wrong admin passcode','red'); return; }
-        state.mode='admin';
-        if(!state.displayName) { state.displayName = 'Mr Oza'; localStorage.setItem('hd_name','Mr Oza'); }
-      } else {
-        state.mode='user';
-      }
       M.Modal.getInstance($('#modalProfile')).close();
-      loadTickets(); toast('Profile updated');
+      toast('Profile updated');
     }
 
-    // ====== Demo data ======
     async function seedDemo(){
       try{
         const t1 = await addDoc(collection(db,'tickets'),{
@@ -515,7 +478,7 @@
           createdAt: serverTimestamp(), lastMessage:'We will install by 4pm', lastAt: serverTimestamp()
         });
         await addDoc(collection(db,'tickets',t2.id,'messages'),{
-          uid:null, name:'Admin', text:'We will install by 4pm', createdAt: serverTimestamp()
+          uid:null, name:'Agent', text:'We will install by 4pm', createdAt: serverTimestamp()
         });
         toast('Demo tickets added');
       }catch(e){ toast(e.message,'red'); }
