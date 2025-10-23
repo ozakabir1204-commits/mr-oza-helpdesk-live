@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>mr Oza all computer class — develop by mr OZA</title>
+  <meta name="description" content="Live Helpdesk with Material Design UI, animated 3D title, and realtime chat with history. Developed by Mr OZA." />
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Materialize CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+  <style>
+    :root{
+      --brandA:#2196f3; --brandB:#26a69a;
+      --bg-grad: linear-gradient(135deg, var(--brandA), var(--brandB));
+      --chip-open:#42a5f5; --chip-progress:#fbc02d; --chip-closed:#66bb6a;
+    }
+    html,body{height:100%;background:#ECEFF1;font-family:Roboto,system-ui,-apple-system,Arial}
+    /* App bar */
+    .appbar{background:var(--bg-grad);background-size:200% 200%;animation:barShift 10s ease infinite;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+    @keyframes barShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+    .brand-logo{font-weight:800;letter-spacing:.5px}.subtle{opacity:.85}
+
+    /* 3D Hero */
+    .hero{position:relative;background:radial-gradient(1200px 400px at 10% 0%,rgba(255,255,255,.3),transparent),radial-gradient(1200px 400px at 90% 0%,rgba(255,255,255,.2),transparent),var(--bg-grad);background-size:200% 200%;animation:heroGrad 12s ease infinite;padding:36px 0 28px;color:#fff;overflow:hidden}
+    @keyframes heroGrad{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+    .hero-wrap{perspective:900px;text-align:center}
+    .title3d{display:inline-block;font-size:clamp(28px,6vw,64px);font-weight:900;letter-spacing:.8px;transform-style:preserve-3d;transform:rotateX(10deg) rotateY(-12deg);animation:tilt 6s ease-in-out infinite alternate;position:relative;line-height:1.05;text-shadow:0 1px 0 rgba(0,0,0,.1),0 2px 0 rgba(0,0,0,.1),0 3px 0 rgba(0,0,0,.1),0 4px 0 rgba(0,0,0,.1),0 10px 20px rgba(0,0,0,.22)}
+    @keyframes tilt{0%{transform:rotateX(11deg) rotateY(-13deg) translateZ(0)}100%{transform:rotateX(-6deg) rotateY(7deg) translateZ(12px)}}
+    .title3d .sheen{position:absolute;inset:0;background:linear-gradient(70deg,transparent,rgba(255,255,255,.55),transparent);transform:translateX(-120%) skewX(-8deg);animation:sheen 3.5s linear infinite;border-radius:12px}
+    @keyframes sheen{0%{transform:translateX(-120%) skewX(-8deg)}100%{transform:translateX(120%) skewX(-8deg)}}
+    .subtitle{margin-top:8px;font-weight:500;opacity:.95;text-shadow:0 10px 22px rgba(0,0,0,.25)}
+
+    /* Layout */
+    .app{padding:16px}
+    .pane{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 12px 24px rgba(0,0,0,.08);transition:transform .2s,box-shadow .2s}
+    .pane:hover{transform:translateY(-2px);box-shadow:0 18px 32px rgba(0,0,0,.12)}
+    .pane-header{padding:14px 16px;border-bottom:1px solid #ECEFF1;display:flex;align-items:center;gap:8px}
+    .pane-body{height:calc(100vh - 275px);overflow:auto}
+    .pane-footer{padding:10px;border-top:1px solid #ECEFF1}
+
+    /* Tickets */
+    .ticket-item{cursor:pointer;border-bottom:1px dashed #eceff1;padding:12px 12px 10px;transition:background .2s}
+    .ticket-item:hover{background:#f7f9fa}.active-ticket{background:#e3f2fd}
+    .ticket-title{font-weight:600}
+    .ticket-sub{font-size:.83rem;color:#607d8b;display:flex;gap:8px;flex-wrap:wrap}
+    .status-chip{color:#fff;border-radius:999px;font-weight:600;padding:2px 10px;font-size:.75rem}
+    .chip-open{background:var(--chip-open)}.chip-progress{background:var(--chip-progress)}.chip-closed{background:var(--chip-closed)}
+
+    /* Chat */
+    .messages{padding:16px;display:flex;flex-direction:column;gap:10px}
+    .bubble{max-width:78%;padding:10px 14px;border-radius:18px;line-height:1.35;box-shadow:0 4px 14px rgba(0,0,0,.08);animation:popIn .22s ease-out}
+    .me{background:#e8f5e9;align-self:flex-end;border-bottom-right-radius:6px}
+    .them{background:#e3f2fd;align-self:flex-start;border-bottom-left-radius:6px}
+    .meta{font-size:.72rem;opacity:.7;margin-top:4px}
+    @keyframes popIn{from{transform:translateY(8px) scale(.97);opacity:0}to{transform:none;opacity:1}}
+
+    /* Typing */
+    .typing{display:none;align-items:center;gap:6px;padding:6px 12px}
+    .typing .dot{width:8px;height:8px;border-radius:50%;background:#90caf9;animation:blink 1s infinite}
+    .typing .dot:nth-child(2){animation-delay:.15s}.typing .dot:nth-child(3){animation-delay:.3s}
+    @keyframes blink{0%,80%,100%{opacity:.15}40%{opacity:1}}
+
+    /* Send bar (FIXED) */
+    .sendbar{display:flex;align-items:center;gap:12px}
+    .sendbar .text{flex:1 1 auto;height:56px;border-radius:28px;border:1px solid #e0e0e0;background:#fafafa;padding:0 16px;font-size:1rem}
+    .sendbar .text:focus{outline:none;border-color:#90caf9;box-shadow:0 0 0 4px rgba(33,150,243,.10)}
+    .sendbar .status{width:170px;height:44px;border-radius:12px;padding:0 8px}
+    .sendbar button{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+    @media(max-width:600px){
+      .sendbar{flex-wrap:wrap}
+      .sendbar .text{order:1;width:100%}
+      .sendbar button{order:2}
+      .sendbar .status{order:3;width:100%}
+    }
+
+    .badge-mini{font-size:.72rem;border-radius:8px;padding:2px 6px;background:#eceff1}
+    .footer-note{font-size:.85rem;opacity:.75;padding:8px 0 16px}
+  </style>
+</head>
+<body>
+  <!-- App Bar -->
+  <nav class="appbar">
+    <div class="nav-wrapper container">
+      <a href="#" class="brand-logo">Helpdesk <span class="subtle">Live</span></a>
+      <ul class="right hide-on-med-and-down">
+        <li><a id="btnProfile" class="tooltipped" data-position="bottom" data-tooltip="Profile & Agent Mode"><i class="material-icons">manage_accounts</i></a></li>
+        <li><a id="btnTheme" class="tooltipped" data-position="bottom" data-tooltip="Toggle light/dark"><i class="material-icons">brightness_6</i></a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- 3D Animated Title -->
+  <section class="hero">
+    <div class="container hero-wrap">
+      <div class="title3d">
+        mr Oza all computer class
+        <div class="sheen"></div>
+      </div>
+      <div class="subtitle">develop by mr OZA</div>
+    </div>
+  </section>
+
+  <main class="app container">
+    <div class="row">
+      <!-- Left: Tickets -->
+      <div class="col s12 l4">
+        <div class="pane">
+          <div class="pane-header">
+            <i class="material-icons">confirmation_number</i>
+            <div style="font-weight:700">Tickets</div>
+            <span id="modeBadge" class="new badge green" data-badge-caption="User"></span>
+            <div class="secondary-content" style="margin-left:auto;display:flex;gap:6px">
+              <a id="seedData" class="btn-flat waves-effect"><i class="material-icons left">library_add</i>Demo</a>
+              <a id="refreshTickets" class="btn-flat waves-effect waves-teal"><i class="material-icons left">refresh</i>Refresh</a>
+            </div>
+          </div>
+          <div class="pane-body" id="ticketsPane">
+            <ul id="ticketList" class="collection" style="border:none; margin:0">
+              <li class="collection-item skeleton" style="height:64px"></li>
+              <li class="collection-item skeleton" style="height:64px"></li>
+              <li class="collection-item skeleton" style="height:64px"></li>
+            </ul>
+          </div>
+          <div class="pane-footer">
+            <div class="footer-note">Tip: Click a ticket to chat in real time. Use the + to open a new ticket.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Chat -->
+      <div class="col s12 l8">
+        <div class="pane">
+          <div class="pane-header" id="chatHeader">
+            <i class="material-icons">chat</i>
+            <div style="font-weight:700">Chat</div>
+            <span id="headerSubject" class="badge-mini" style="margin-left:8px">No ticket selected</span>
+            <span id="headerStatus" class="status-chip chip-open" style="margin-left:auto; display:none">OPEN</span>
+          </div>
+          <div class="pane-body" id="chatPane">
+            <div class="messages" id="messages"></div>
+            <div class="typing" id="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+          </div>
+          <div class="pane-footer">
+            <form id="sendForm" class="sendbar">
+              <input id="msgInput" class="text browser-default" type="text" placeholder="Type a message… (Enter to send)" autocomplete="off" />
+              <select id="statusSelect" class="status browser-default" style="display:none">
+                <option value="open">Open</option>
+                <option value="progress">In Progress</option>
+                <option value="closed">Closed</option>
+              </select>
+              <button id="sendBtn" class="btn-large pulse-sheen waves-effect waves-light" type="submit"><i class="material-icons">send</i></button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAB: New ticket -->
+    <div class="fixed-action-btn">
+      <a id="fabNew" class="btn-floating btn-large teal pulse-sheen tooltipped" data-position="left" data-tooltip="New Ticket">
+        <i class="large material-icons">add</i>
+      </a>
+    </div>
+  </main>
+
+  <!-- Modal: New Ticket -->
+  <div id="modalNew" class="modal">
+    <div class="modal-content">
+      <h5><i class="material-icons">add_circle</i> New Ticket</h5>
+      <div class="row" style="margin-top:14px">
+        <div class="input-field col s12 m6">
+          <input id="subject" type="text" maxlength="80" />
+          <label for="subject">Subject</label>
+        </div>
+        <div class="input-field col s12 m6">
+          <select id="category">
+            <option value="General" selected>General</option>
+            <option value="Account">Account</option>
+            <option value="Network">Network</option>
+            <option value="Hardware">Hardware</option>
+            <option value="Software">Software</option>
+          </select>
+          <label>Category</label>
+        </div>
+        <div class="input-field col s12">
+          <textarea id="details" class="materialize-textarea" data-length="280"></textarea>
+          <label for="details">Describe your issue</label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a href="#!" class="modal-close btn-flat">Cancel</a>
+      <a id="createTicket" class="btn">Create</a>
+    </div>
+  </div>
+
+  <!-- Modal: Profile / Agent Mode -->
+  <div id="modalProfile" class="modal">
+    <div class="modal-content">
+      <h5><i class="material-icons">person</i> Your Profile</h5>
+      <div class="row" style="margin-top:14px">
+        <div class="input-field col s12 m6">
+          <input id="displayName" type="text" maxlength="30" />
+          <label for="displayName">Display name</label>
+        </div>
+        <div class="input-field col s12 m6">
+          <input id="emailHint" type="text" placeholder="optional: email for context" />
+          <label for="emailHint" class="active">Email (not stored, just used in messages)</label>
+        </div>
+      </div>
+      <div class="card blue-grey lighten-5 z-depth-0" style="padding:12px">
+        <label>
+          <input type="checkbox" class="filled-in" id="agentToggle" />
+          <span><b>Agent Mode</b> (show all tickets & allow status changes)</span>
+        </label>
+        <div class="input-field" id="agentPassWrap" style="display:none">
+          <input id="agentPass" type="password" />
+          <label for="agentPass">Agent passcode</label>
+        </div>
+        <div class="grey-text text-darken-1" style="font-size:.9rem">For classrooms/demos only. For production use proper Auth & role claims.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a href="#!" class="modal-close btn-flat">Close</a>
+      <a id="saveProfile" class="btn">Save</a>
+    </div>
+  </div>
+
+  <!-- Materialize JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+  <!-- Firebase v10 (Modular) + Analytics -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js';
+    import { getAnalytics, isSupported } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-analytics.js';
+    import { getAuth, signInAnonymously, onAuthStateChanged, updateProfile } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js';
+    import { getFirestore, collection, addDoc, doc, updateDoc, serverTimestamp, query, orderBy, onSnapshot, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js';
+
+    // ==== Firebase Config (your project) ====
+    const firebaseConfig = {
+      apiKey: "AIzaSyD4vP74YleiqqpVyIZzCQLqcjWIkcrzlxo",
+      authDomain: "mr-oza-helpdesk.firebaseapp.com",
+      projectId: "mr-oza-helpdesk",
+      storageBucket: "mr-oza-helpdesk.firebasestorage.app",
+      messagingSenderId: "340032460471",
+      appId: "1:340032460471:web:a0a87895948ca769199f32",
+      measurementId: "G-PC18TN83WD"
+    };
+
+    let app, auth, db, user, unsubTickets=null, unsubMessages=null;
+
+    // Small helpers
+    const $ = s=>document.querySelector(s);
+    const $$ = s=>Array.from(document.querySelectorAll(s));
+    const toast = (m,c='')=> M.toast({html:m, displayLength:2400, classes:c});
+    const chip = s => {
+      const m = {open:['OPEN','chip-open'], progress:['IN PROGRESS','chip-progress'], closed:['CLOSED','chip-closed']};
+      return `<span class="status-chip ${m[s]?.[1]||'chip-open'}">${m[s]?.[0]||'OPEN'}</span>`;
+    };
+    function escapeHtml(str){ return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s])); }
+    function tsToDate(ts){ if(!ts) return null; if (ts.toDate) return ts.toDate(); if (typeof ts.seconds==='number') return new Date(ts.seconds*1000); return null; }
+    function fmtRel(d){ if(!d) return ''; const s=(Date.now()-d.getTime())/1000; if(s<45) return 'just now'; if(s<3600) return Math.floor(s/60)+'m'; if(s<86400) return Math.floor(s/3600)+'h'; return d.toLocaleDateString(); }
+
+    let state = {
+      mode:'user',                         // 'user' | 'agent'
+      agentPass:'OZA2025',                 // demo passcode
+      displayName: localStorage.getItem('hd_name') || '',
+      emailHint: localStorage.getItem('hd_email') || '',
+      activeTicketId:null, activeTicket:null,
+    };
+
+    // ==== Materialize init ====
+    document.addEventListener('DOMContentLoaded', ()=>{
+      const modalNew = M.Modal.init($('#modalNew'), { onOpenStart: ()=> M.FormSelect.init($$('select')) });
+      const modalProf= M.Modal.init($('#modalProfile'));
+      M.Tooltip.init($$('.tooltipped'));
+      if(!state.displayName) setTimeout(()=> modalProf.open(), 500);
+    });
+
+    // Light/dark
+    $('#btnTheme').addEventListener('click', ()=>{
+      document.body.classList.toggle('blue-grey');
+      toast('Theme toggled');
+    });
+
+    // ==== Firebase boot + Analytics ====
+    (async function(){
+      try{
+        app = initializeApp(firebaseConfig);
+        try { const ok = await isSupported(); if (ok) getAnalytics(app); } catch {}
+        auth = getAuth(app);
+        db = getFirestore(app);
+        await signInAnonymously(auth);
+        onAuthStateChanged(auth, async u=>{
+          if(!u) return;
+          user = u;
+          if(state.displayName){ try{ await updateProfile(user,{displayName:state.displayName}); }catch{} }
+          bindUI();
+          loadTickets();
+        });
+      }catch(err){ console.error(err); toast('Init failed','red'); }
+    })();
+
+    // ==== UI Bindings ====
+    function bindUI(){
+      $('#fabNew').addEventListener('click', ()=> M.Modal.getInstance($('#modalNew')).open());
+      $('#createTicket').addEventListener('click', createTicket);
+      $('#btnProfile').addEventListener('click', ()=>{
+        $('#displayName').value = state.displayName; M.updateTextFields();
+        $('#emailHint').value = state.emailHint; M.updateTextFields();
+        $('#agentToggle').checked = (state.mode==='agent');
+        $('#agentPassWrap').style.display = $('#agentToggle').checked ? 'block' : 'none';
+        M.Modal.getInstance($('#modalProfile')).open();
+      });
+      $('#agentToggle').addEventListener('change', e=> $('#agentPassWrap').style.display = e.target.checked ? 'block' : 'none');
+      $('#saveProfile').addEventListener('click', saveProfile);
+      $('#refreshTickets').addEventListener('click', loadTickets);
+      $('#seedData').addEventListener('click', seedDemo);
+      $('#sendForm').addEventListener('submit', sendMessage);
+      $('#msgInput').addEventListener('input', handleTyping);
+      $('#msgInput').addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); $('#sendForm').requestSubmit(); } });
+      $('#statusSelect').addEventListener('change', async e=>{
+        if(!state.activeTicketId) return;
+        try{ await updateDoc(doc(db,'tickets',state.activeTicketId), {status:e.target.value}); toast('Status updated'); }
+        catch(err){ toast(err.message,'red'); }
+      });
+    }
+
+    // ==== Tickets ====
+    function ticketItemTemplate(t){
+      const lastAt = fmtRel(tsToDate(t.lastAt));
+      const lastMsg = escapeHtml(t.lastMessage||'');
+      return `
+      <li class="ticket-item collection-item ${state.activeTicketId===t.id?'active-ticket':''}" data-id="${t.id}">
+        <div style="display:flex; align-items:center; gap:10px">
+          <i class="material-icons">confirmation_number</i>
+          <div style="flex:1;min-width:0">
+            <div class="ticket-title">${escapeHtml(t.subject||'(no subject)')}</div>
+            <div class="ticket-sub">
+              <span>${escapeHtml(t.category||'General')}</span>
+              <span>• by ${escapeHtml(t.creatorName||'Anon')}</span>
+              ${lastAt?`<span>• ${lastAt}</span>`:''}
+            </div>
+            ${lastMsg?`<div class="grey-text text-darken-1" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${lastMsg}</div>`:''}
+          </div>
+          ${chip(t.status||'open')}
+        </div>
+      </li>`;
+    }
+
+    async function loadTickets(){
+      if(unsubTickets){ unsubTickets(); unsubTickets=null; }
+      $('#ticketList').innerHTML = '<li class="collection-item skeleton" style="height:64px"></li><li class="collection-item skeleton" style="height:64px"></li>';
+      const qAll = query(collection(db,'tickets'), orderBy('createdAt','desc'));
+      unsubTickets = onSnapshot(qAll, snap=>{
+        const items = [];
+        snap.forEach(docu=>{
+          const t = { id: docu.id, ...docu.data() };
+          if(state.mode==='agent' || t.creatorUid===user?.uid) items.push(ticketItemTemplate(t));
+        });
+        $('#ticketList').innerHTML = items.join('') || '<li class="collection-item">No tickets yet. Click + to create one, or press Demo.</li>';
+        $$('#ticketList .ticket-item').forEach(li=> li.addEventListener('click', ()=> openTicket(li.dataset.id)) );
+      }, err=> toast(err.message,'red'));
+
+      const badge = $('#modeBadge');
+      if(state.mode==='agent'){ badge.classList.remove('green'); badge.classList.add('blue'); badge.setAttribute('data-badge-caption','Agent'); $('#statusSelect').style.display='block'; }
+      else { badge.classList.remove('blue'); badge.classList.add('green'); badge.setAttribute('data-badge-caption','User'); $('#statusSelect').style.display='none'; }
+    }
+
+    async function createTicket(){
+      const subject = $('#subject').value.trim();
+      const category = $('#category').value;
+      const details = $('#details').value.trim();
+      if(!subject){ toast('Please add a subject','orange'); return; }
+      try{
+        const ref = await addDoc(collection(db,'tickets'),{
+          subject, category, details, status:'open', priority:'normal',
+          lastMessage: '', lastAt: serverTimestamp(),
+          creatorUid: user?.uid || null, creatorName: state.displayName || 'Anonymous',
+          createdAt: serverTimestamp()
+        });
+        toast('Ticket created ✅');
+        M.Modal.getInstance($('#modalNew')).close();
+        openTicket(ref.id);
+      }catch(err){ toast(err.message,'red'); }
+    }
+
+    async function openTicket(id){
+      state.activeTicketId = id;
+      $$('#ticketList .ticket-item').forEach(el=> el.classList.toggle('active-ticket', el.dataset.id===id));
+      if(unsubMessages){ unsubMessages(); unsubMessages=null; }
+      $('#messages').innerHTML='';
+
+      try{
+        const tdoc = await getDoc(doc(db,'tickets',id));
+        state.activeTicket = { id, ...tdoc.data() };
+        $('#headerSubject').innerText = state.activeTicket.subject || '(no subject)';
+        const st = state.activeTicket.status || 'open';
+        const headerStatus = $('#headerStatus');
+        headerStatus.style.display='inline-block';
+        headerStatus.className = 'status-chip ' + (st==='open'?'chip-open': st==='progress'?'chip-progress':'chip-closed');
+        headerStatus.textContent = (st.toUpperCase()).replace('_',' ');
+        const isAgent = (state.mode==='agent');
+        $('#statusSelect').style.display = isAgent ? 'block' : 'none';
+        if(isAgent) $('#statusSelect').value = st;
+      }catch(e){ toast(e.message,'red'); }
+
+      const qMsgs = query(collection(db,'tickets',id,'messages'), orderBy('createdAt','asc'));
+      unsubMessages = onSnapshot(qMsgs, snap=>{
+        const frag = document.createDocumentFragment();
+        snap.docChanges().forEach(ch=>{
+          if(ch.type==='added'){
+            frag.appendChild(renderMessage({ id: ch.doc.id, ...ch.doc.data() }));
+          }
+        });
+        $('#messages').appendChild(frag);
+        const pane = $('#chatPane'); pane.scrollTop = pane.scrollHeight;
+      });
+    }
+
+    // ==== Messages ====
+    function renderMessage(m){
+      const wrap = document.createElement('div');
+      const mine = m.uid === user?.uid;
+      const ts = tsToDate(m.createdAt);
+      const when = ts ? ts.toLocaleString() : '';
+      wrap.className = 'bubble ' + (mine?'me':'them');
+      wrap.innerHTML = `${escapeHtml(m.text||'')}<div class="meta">${escapeHtml(m.name||'Anon')}${m.email? ' • '+escapeHtml(m.email): ''}${when? ' • '+escapeHtml(when):''}</div>`;
+      return wrap;
+    }
+    async function sendMessage(e){
+      e.preventDefault();
+      if(!state.activeTicketId){ toast('Select or create a ticket to chat.','orange'); return; }
+      const text = $('#msgInput').value.trim(); if(!text) return;
+      try{
+        await addDoc(collection(db,'tickets',state.activeTicketId,'messages'),{
+          uid:user?.uid||null, name: state.displayName||'Anonymous', email: state.emailHint||'',
+          role: state.mode==='agent' ? 'agent' : 'user',
+          text, createdAt: serverTimestamp()
+        });
+        // Update ticket history fields
+        await updateDoc(doc(db,'tickets',state.activeTicketId), {
+          lastMessage: text, lastAt: serverTimestamp()
+        });
+        $('#msgInput').value='';
+      }catch(err){ toast(err.message,'red'); }
+    }
+    let typingTimer=null;
+    function handleTyping(){ clearTimeout(typingTimer); $('#typing').style.display='flex'; typingTimer = setTimeout(()=> $('#typing').style.display='none', 900); }
+
+    // ==== Profile & Mode ====
+    async function saveProfile(){
+      const name = $('#displayName').value.trim();
+      const emailHint = $('#emailHint').value.trim();
+      const wantAgent = $('#agentToggle').checked;
+      if(name){ state.displayName = name; localStorage.setItem('hd_name',name); try{ await updateProfile(user,{displayName:name}); }catch{} }
+      state.emailHint = emailHint; localStorage.setItem('hd_email',emailHint);
+      if(wantAgent){
+        const pass = $('#agentPass').value.trim();
+        if(pass !== state.agentPass){ toast('Wrong agent passcode','red'); return; }
+        state.mode='agent';
+      } else { state.mode='user'; }
+      M.Modal.getInstance($('#modalProfile')).close();
+      loadTickets(); toast('Profile updated');
+    }
+
+    // ==== Demo data (optional) ====
+    async function seedDemo(){
+      try{
+        const t1 = await addDoc(collection(db,'tickets'),{
+          subject:'Wi-Fi not connecting', category:'Network', details:'Laptop keeps dropping campus Wi-Fi.',
+          status:'open', creatorUid:user?.uid||null, creatorName: state.displayName || 'Anonymous',
+          createdAt: serverTimestamp(), lastMessage:'Having trouble since morning', lastAt: serverTimestamp()
+        });
+        await addDoc(collection(db,'tickets',t1.id,'messages'),{
+          uid:user?.uid||null,name:state.displayName||'Anonymous', text:'Having trouble since morning', createdAt: serverTimestamp()
+        });
+
+        const t2 = await addDoc(collection(db,'tickets'),{
+          subject:'Install MS Office', category:'Software', details:'Need Office on Lab PC 12.',
+          status:'progress', creatorUid:user?.uid||null, creatorName: state.displayName || 'Anonymous',
+          createdAt: serverTimestamp(), lastMessage:'We will install by 4pm', lastAt: serverTimestamp()
+        });
+        await addDoc(collection(db,'tickets',t2.id,'messages'),{
+          uid:null, name:'Agent', text:'We will install by 4pm', createdAt: serverTimestamp()
+        });
+        toast('Demo tickets added');
+      }catch(e){ toast(e.message,'red'); }
+    }
+  </script>
+
+  <!-- Firestore Rules (demo starter; set these in Firebase Console and harden later)
+  rules_version = '2';
+  service cloud.firestore {
+    match /databases/{database}/documents {
+      match /tickets/{ticketId} {
+        allow read: if true; // demo
+        allow create, update, delete: if request.auth != null;
+        match /messages/{messageId} {
+          allow read: if true;
+          allow create: if request.auth != null;
+        }
+      }
+    }
+  } -->
+</body>
+</html>
