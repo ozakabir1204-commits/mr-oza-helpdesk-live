@@ -1,695 +1,607 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" /> 
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MR.Oza ALL COMPUTER CLASS AND AOIT CLASS</title>
-  <meta name="description" content="Live Helpdesk with Material Design UI, animated 3D title, and realtime chat with history. Developed by Mr OZA." />
-  <!-- Fonts & Icons -->
+  <title>MR Oza • Live Help‑Desk (AOIT & CS Classes)</title>
+  <meta name="description" content="Real‑time Live Help‑Desk for AOIT & Computer Science classes. Chat history, tickets (add/update/close), and admin tools for MR Oza. Built with Firebase + Material UI." />
+
+  <!-- Roboto + Material Symbols -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <!-- Materialize CSS -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+
   <style>
-    :root{ --brandA:#2196f3; --brandB:#26a69a; --bg-grad:linear-gradient(135deg,var(--brandA),var(--brandB));
-           --chip-open:#42a5f5; --chip-progress:#fbc02d; --chip-closed:#66bb6a }
-    html,body{height:100%;background:#ECEFF1;font-family:Roboto,system-ui,-apple-system,Arial}
-    .appbar{background:var(--bg-grad);background-size:200% 200%;animation:barShift 10s ease infinite;box-shadow:0 8px 24px rgba(0,0,0,.2)}
-    @keyframes barShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-    .brand-logo{font-weight:800;letter-spacing:.5px}.subtle{opacity:.85}
+    :root {
+      --bg: #0b1020;
+      --card: #121a2f;
+      --card-2: #0f1630;
+      --text: #e9eefc;
+      --muted: #b8c2e6;
+      --primary: #4f8cff; /* material-ish blue */
+      --accent: #30d0a0;  /* teal */
+      --warning: #ffb020;
+      --danger: #ff5d5d;
+      --success: #2cc071;
+      --chip: #1a2442;
+      --ripple: rgba(255,255,255,0.25);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0; font-family: Roboto, system-ui, -apple-system, Segoe UI, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--text); background: radial-gradient(1200px 600px at 10% -10%, #233058 0, rgba(0,0,0,0) 60%),
+                             radial-gradient(1200px 600px at 100% 0%, #1d2446 0, rgba(0,0,0,0) 60%),
+                             linear-gradient(180deg, #0a0f1f, #0b1020 40%);
+      overflow: hidden;
+    }
 
-    .hero{position:relative;background:radial-gradient(1200px 400px at 10% 0%,rgba(255,255,255,.3),transparent),
-                                  radial-gradient(1200px 400px at 90% 0%,rgba(255,255,255,.2),transparent),
-                                  var(--bg-grad);background-size:200% 200%;animation:heroGrad 12s ease infinite;padding:36px 0 28px;color:#fff;overflow:hidden}
-    @keyframes heroGrad{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-    .hero-wrap{perspective:900px;text-align:center}
-    .title3d{display:inline-block;font-size:clamp(28px,6vw,64px);font-weight:900;letter-spacing:.8px;transform-style:preserve-3d;transform:rotateX(10deg) rotateY(-12deg);animation:tilt 6s ease-in-out infinite alternate;position:relative;line-height:1.05;text-shadow:0 1px 0 rgba(0,0,0,.1),0 2px 0 rgba(0,0,0,.1),0 3px 0 rgba(0,0,0,.1),0 4px 0 rgba(0,0,0,.1),0 10px 20px rgba(0,0,0,.22)}
-    @keyframes tilt{0%{transform:rotateX(11deg) rotateY(-13deg) translateZ(0)}100%{transform:rotateX(-6deg) rotateY(7deg) translateZ(12px)}}
-    .title3d .sheen{position:absolute;inset:0;background:linear-gradient(70deg,transparent,rgba(255,255,255,.55),transparent);transform:translateX(-120%) skewX(-8deg);animation:sheen 3.5s linear infinite;border-radius:12px}
-    @keyframes sheen{0%{transform:translateX(-120%) skewX(-8deg)}100%{transform:translateX(120%) skewX(-8deg)}}
-    .subtitle{margin-top:8px;font-weight:500;opacity:.95;text-shadow:0 10px 22px rgba(0,0,0,.25)}
+    /* Top app bar */
+    .appbar {
+      display:flex; align-items:center; gap:.75rem; padding:.75rem 1rem; position:sticky; top:0; z-index:10;
+      background: linear-gradient(90deg, rgba(15,22,48,.8), rgba(18,26,47,.8));
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .logo {
+      width:40px; height:40px; display:grid; place-items:center; border-radius:12px; background:linear-gradient(135deg, #4f8cff, #30d0a0);
+      box-shadow: 0 6px 24px rgba(79,140,255,.4);
+      font-weight:900; letter-spacing:.5px;
+    }
+    .title {
+      font-size:clamp(16px, 2.2vw, 22px); font-weight:800; letter-spacing:.3px; line-height:1.1;
+    }
+    .subtitle {
+      font-size:12px; color: var(--muted);
+    }
+    .spacer { flex: 1; }
+    .btn {
+      appearance:none; border:0; outline:0; cursor:pointer; border-radius:14px;
+      padding:.6rem .9rem; font-weight:600; color:#0b1020; background: var(--text);
+      transition: transform .05s ease-in-out, filter .2s ease;
+      position:relative; overflow:hidden;
+    }
+    .btn:hover { filter: brightness(1.05); }
+    .btn:active { transform: translateY(1px) scale(.98); }
+    .btn.primary { background: linear-gradient(135deg, #4f8cff, #5eb1f7); color:white; }
+    .btn.ghost { background: transparent; color: var(--text); border:1px solid rgba(255,255,255,.15); }
+    .icon { font-family: 'Material Symbols Rounded'; font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
 
-    .app{padding:16px}
-    .pane{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 12px 24px rgba(0,0,0,.08);transition:transform .2s,box-shadow .2s}
-    .pane:hover{transform:translateY(-2px);box-shadow:0 18px 32px rgba(0,0,0,.12)}
-    .pane-header{padding:14px 16px;border-bottom:1px solid #ECEFF1;display:flex;align-items:center;gap:8px}
-    .pane-body{height:calc(100vh - 275px);overflow:auto}
-    .pane-footer{padding:10px;border-top:1px solid #ECEFF1}
+    /* Layout */
+    .shell { display:grid; grid-template-rows: auto 1fr; height: 100%; }
+    .main { display:grid; grid-template-columns: 300px 1fr; gap: 14px; padding: 14px; height: calc(100vh - 72px); }
+    @media (max-width: 900px){ .main { grid-template-columns: 1fr; height: auto; overflow:auto; } }
 
-    .ticket-item{cursor:pointer;border-bottom:1px dashed #eceff1;padding:12px 12px 10px;transition:background .2s}
-    .ticket-item:hover{background:#f7f9fa}.active-ticket{background:#e3f2fd}
-    .ticket-title{font-weight:600}
-    .ticket-sub{font-size:.83rem;color:#607d8b;display:flex;gap:8px;flex-wrap:wrap}
-    .status-chip{color:#fff;border-radius:999px;font-weight:600;padding:2px 10px;font-size:.75rem}
-    .chip-open{background:var(--chip-open)}.chip-progress{background:var(--chip-progress)}.chip-closed{background:var(--chip-closed)}
+    .card { background: linear-gradient(180deg, var(--card), var(--card-2)); border: 1px solid rgba(255,255,255,.06); border-radius: 22px;
+            box-shadow: 0 10px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04); }
 
-    .messages{padding:16px;display:flex;flex-direction:column;gap:10px}
-    .bubble{max-width:78%;padding:10px 14px;border-radius:18px;line-height:1.35;box-shadow:0 4px 14px rgba(0,0,0,.08);animation:popIn .22s ease-out;position:relative}
-    .me{background:#e8f5e9;align-self:flex-end;border-bottom-right-radius:6px}
-    .them{background:#e3f2fd;align-self:flex-start;border-bottom-left-radius:6px}
-    .meta{font-size:.72rem;opacity:.7;margin-top:4px}
-    .bubble-actions{position:absolute; top:6px; right:8px; cursor:pointer; opacity:.45; transition:opacity .2s}
-    .bubble:hover .bubble-actions{opacity:1}
-    .bubble-actions i{font-size:18px}
-    @keyframes popIn{from{transform:translateY(8px) scale(.97);opacity:0}to{transform:none;opacity:1}}
+    /* Left panel: welcome + auth + tabs */
+    .left { padding: 16px; display:flex; flex-direction:column; gap:16px; }
+    .hero {
+      position:relative; overflow:hidden; padding:16px; border-radius:18px; background: linear-gradient(135deg, rgba(79,140,255,.2), rgba(48,208,160,.15));
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .hero h1 { margin:0; font-size: clamp(18px, 2.6vw, 22px); }
+    .ticker { color: var(--muted); font-size: 12px; margin-top: 6px; white-space: nowrap; overflow: hidden; }
+    .ticker span { display:inline-block; padding-right: 40px; animation: marquee 16s linear infinite; }
+    @keyframes marquee { from { transform:translateX(0); } to { transform:translateX(-100%); } }
 
-    .typing{display:none;align-items:center;gap:6px;padding:6px 12px}
-    .typing .dot{width:8px;height:8px;border-radius:50%;background:#90caf9;animation:blink 1s infinite}
-    .typing .dot:nth-child(2){animation-delay:.15s}.typing .dot:nth-child(3){animation-delay:.3s}
-    @keyframes blink{0%,80%,100%{opacity:.15}40%{opacity:1}}
+    .auth { display:flex; flex-direction:column; gap:10px; }
+    .field { display:flex; flex-direction:column; gap:6px; }
+    .field input, .field select, .field textarea {
+      background: rgba(255,255,255,.04); color: var(--text); border:1px solid rgba(255,255,255,.12);
+      border-radius: 12px; padding: 10px 12px; outline: none; font: inherit; transition: border .2s;
+    }
+    .field input:focus, .field textarea:focus { border-color: var(--primary); }
 
-    .sendbar{display:flex;align-items:center;gap:12px}
-    .sendbar .text{flex:1 1 auto;height:56px;border-radius:28px;border:1px solid #e0e0e0;background:#fafafa;padding:0 16px;font-size:1rem}
-    .sendbar .text:focus{outline:none;border-color:#90caf9;box-shadow:0 0 0 4px rgba(33,150,243,.10)}
-    .sendbar .status{width:170px;height:44px;border-radius:12px;padding:0 8px}
-    .sendbar button{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-    @media(max-width:600px){.sendbar{flex-wrap:wrap}.sendbar .text{order:1;width:100%}.sendbar button{order:2}.sendbar .status{order:3;width:100%}}
+    .tabs { display:flex; gap:8px; }
+    .tab { flex:1; text-align:center; padding:10px 12px; border-radius:12px; cursor:pointer; user-select:none; border:1px solid rgba(255,255,255,.1); color: var(--muted); }
+    .tab.active { color:white; border-color: transparent; background: rgba(79,140,255,.12); }
 
-    .badge-mini{font-size:.72rem;border-radius:8px;padding:2px 6px;background:#eceff1}
-    .footer-note{font-size:.85rem;opacity:.75;padding:8px 0 16px}
+    /* Right: content views */
+    .content { position:relative; overflow:hidden; }
+    .view { position:absolute; inset:0; display:none; }
+    .view.active { display:grid; grid-template-rows: 1fr auto; }
 
-    /* Gate & codes modal minor tweaks */
-    .code-hint{font-size:.85rem;opacity:.75}
+    /* Chat view */
+    .chat-stream { overflow:auto; padding: 18px; display:flex; flex-direction:column; gap:12px; }
+    .bubble { max-width: 72ch; padding: 10px 12px; border-radius: 14px; border:1px solid rgba(255,255,255,.08); background: #0e1731; }
+    .bubble.me { background: #18224a; border-color: rgba(79,140,255,.4); }
+    .bubble.admin { background: #0d2a1f; border-color: rgba(48,208,160,.5); }
+    .meta { font-size:11px; color: var(--muted); margin-bottom: 4px; display:flex; gap:6px; align-items:center; }
+    .msg { font-size:14px; white-space: pre-wrap; }
+    .row { display:flex; gap:8px; padding: 12px; border-top: 1px solid rgba(255,255,255,.08); }
+    .row input { flex:1; }
+
+    /* Tickets view */
+    .tickets { overflow:auto; padding: 18px; display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:14px; }
+    .ticket { padding: 12px; border-radius: 14px; border:1px solid rgba(255,255,255,.08); background:#0f1838; display:flex; flex-direction:column; gap:8px; }
+    .chip { display:inline-flex; align-items:center; gap:6px; background: var(--chip); color: #c9d5ff; border:1px solid rgba(255,255,255,.08); border-radius:999px; padding:4px 10px; font-size:12px; }
+    .status-Open { color:white; background: rgba(79,140,255,.2); }
+    .status-In\ Progress { color:white; background: rgba(255,176,32,.22); }
+    .status-Closed { color:white; background: rgba(44,192,113,.24); }
+
+    .ticket-actions { display:flex; gap:8px; flex-wrap:wrap; }
+
+    /* Admin view */
+    .admin-panel { padding: 18px; display:flex; flex-direction:column; gap:12px; }
+    .danger { background: linear-gradient(135deg, #ff5d5d, #ff9f6a); color:white; }
+    .warn { background: linear-gradient(135deg, #ffb020, #ffd25b); color:#1a1300; }
+    .okay { background: linear-gradient(135deg, #2cc071, #8ad6b1); color:#00170b; }
+
+    /* Toast */
+    .toast { position:fixed; bottom:16px; left:50%; transform:translateX(-50%) translateY(120%);
+      background: rgba(20,28,56,.96); color: var(--text); border:1px solid rgba(255,255,255,.08);
+      padding: 10px 14px; border-radius: 12px; transition: transform .25s ease; z-index: 50; }
+    .toast.show { transform:translateX(-50%) translateY(0%); }
+
+    /* Simple focus ring for a11y */
+    :focus-visible { outline: 2px solid #5eb1f7; outline-offset: 2px; border-radius: 10px; }
   </style>
 </head>
 <body>
-  <nav class="appbar">
-    <div class="nav-wrapper container">
-      <a href="#" class="brand-logo">Helpdesk <span class="subtle">Live</span></a>
-      <ul class="right hide-on-med-and-down" style="display:flex;align-items:center;gap:6px">
-        <li><a id="btnCodes" style="display:none" class="tooltipped" data-position="bottom" data-tooltip="Manage access codes"><i class="material-icons">admin_panel_settings</i></a></li>
-        <li><a id="btnProfile" class="tooltipped" data-position="bottom" data-tooltip="Profile"><i class="material-icons">manage_accounts</i></a></li>
-        <li><a id="btnTheme" class="tooltipped" data-position="bottom" data-tooltip="Toggle light/dark"><i class="material-icons">brightness_6</i></a></li>
-      </ul>
-    </div>
-  </nav>
+  <div class="shell">
+    <header class="appbar">
+      <div class="logo" aria-hidden="true">AO</div>
+      <div>
+        <div class="title">Welcome to <strong>Live Help‑Desk</strong> — Created by <strong>MR OZA</strong></div>
+        <div class="subtitle">Welcome to AOIT & All Computer Science Class • Real‑time help, history you can review, and ticket tracking.</div>
+      </div>
+      <div class="spacer"></div>
+      <button id="btnSignOut" class="btn ghost" hidden><span class="icon">logout</span> Sign out</button>
+    </header>
 
-  <section class="hero">
-    <div class="container hero-wrap">
-      <div class="title3d">MR.OZA ALL COMPUTER CLASSES AND AOIT CLASSES<div class="sheen"></div></div>
-      <div class="subtitle">DEVELOP BY MR.OZA</div>
-    </div>
-  </section>
+    <main class="main">
+      <!-- LEFT PANEL -->
+      <section class="card left">
+        <div class="hero">
+          <h1>Hi, <span id="who">Guest</span> 👋</h1>
+          <div class="ticker"><span>Welcome to Live Help‑Desk • Welcome to AOIT & All Computer Science Class • Built with Firebase • Chat history is preserved • Be professional and respectful •</span></div>
+        </div>
 
-  <main class="app container">
-    <div class="row">
-      <!-- Tickets -->
-      <div class="col s12 l4">
-        <div class="pane">
-          <div class="pane-header">
-            <i class="material-icons">confirmation_number</i>
-            <div style="font-weight:700">Tickets</div>
-            <span id="modeBadge" class="new badge green" data-badge-caption="User"></span>
-            <div class="secondary-content" style="margin-left:auto;display:flex;gap:6px">
-              <a id="seedData" class="btn-flat waves-effect"><i class="material-icons left">library_add</i>Demo</a>
-              <a id="refreshTickets" class="btn-flat waves-effect waves-teal"><i class="material-icons left">refresh</i>Refresh</a>
+        <div class="auth">
+          <div class="field">
+            <label for="displayName">Your display name</label>
+            <input id="displayName" placeholder="e.g., Alex (AOIT)" autocomplete="name" />
+          </div>
+
+          <div class="field">
+            <label for="rolePick">Role</label>
+            <select id="rolePick">
+              <option value="student">Student / Guest (anonymous)</option>
+              <option value="admin">Admin (email login)</option>
+            </select>
+          </div>
+
+          <div id="adminFields" class="field" hidden>
+            <label for="adminEmail">Admin email</label>
+            <input id="adminEmail" type="email" placeholder="admin@example.com" autocomplete="email" />
+            <label for="adminPass" style="margin-top:6px">Admin password</label>
+            <input id="adminPass" type="password" placeholder="••••••••" autocomplete="current-password" />
+            <small style="color:var(--muted)">Tip: create an Admin user in Firebase Authentication → Email/Password. Do <strong>not</strong> publish the password.</small>
+          </div>
+
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button id="btnSignIn" class="btn primary"><span class="icon">login</span> Sign in</button>
+            <button id="btnUseSaved" class="btn" title="Use last name from this browser">Use saved name</button>
+          </div>
+        </div>
+
+        <div class="tabs" style="margin-top:8px;">
+          <div class="tab active" data-view="chatView"><span class="icon">forum</span>&nbsp;Chat</div>
+          <div class="tab" data-view="ticketsView"><span class="icon">confirmation_number</span>&nbsp;Tickets</div>
+          <div id="tabAdmin" class="tab" data-view="adminView" hidden><span class="icon">admin_panel_settings</span>&nbsp;Admin</div>
+        </div>
+
+        <div style="margin-top:8px; font-size:12px; color:var(--muted)">
+          • Keep messages school‑appropriate. • Do not share private information. • Tickets help track bigger issues.
+        </div>
+      </section>
+
+      <!-- RIGHT PANEL: VIEWS -->
+      <section class="card content">
+        <!-- CHAT -->
+        <div id="chatView" class="view active" role="region" aria-label="Chat">
+          <div id="chatStream" class="chat-stream"></div>
+          <div class="row">
+            <input id="chatInput" maxlength="500" placeholder="Type your message…"/>
+            <button id="btnSend" class="btn primary"><span class="icon">send</span></button>
+          </div>
+        </div>
+
+        <!-- TICKETS -->
+        <div id="ticketsView" class="view" role="region" aria-label="Tickets">
+          <div class="tickets" id="ticketList"></div>
+          <div class="row" style="align-items:flex-start; flex-wrap:wrap; gap:8px;">
+            <input id="tTitle" maxlength="80" placeholder="New ticket title" />
+            <input id="tDesc" maxlength="200" placeholder="Short description" />
+            <button id="btnAddTicket" class="btn okay"><span class="icon">add</span> Add Ticket</button>
+          </div>
+        </div>
+
+        <!-- ADMIN -->
+        <div id="adminView" class="view" role="region" aria-label="Admin">
+          <div class="admin-panel">
+            <div style="font-weight:700">Admin tools (visible only to MR Oza)</div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button id="btnDeleteAllChat" class="btn danger"><span class="icon">delete_forever</span> Delete ALL chat</button>
+              <button id="btnDeleteAllTickets" class="btn warn"><span class="icon">delete_sweep</span> Delete ALL tickets</button>
+              <button id="btnExport" class="btn ghost"><span class="icon">download</span> Export data (JSON)</button>
             </div>
-          </div>
-          <div class="pane-body">
-            <ul id="ticketList" class="collection" style="border:none;margin:0">
-              <li class="collection-item skeleton" style="height:64px"></li>
-              <li class="collection-item skeleton" style="height:64px"></li>
-              <li class="collection-item skeleton" style="height:64px"></li>
-            </ul>
-          </div>
-          <div class="pane-footer"><div class="footer-note">Tip: Click a ticket to chat in real time. Use the + to open a new ticket.</div></div>
-        </div>
-      </div>
-
-      <!-- Chat -->
-      <div class="col s12 l8">
-        <div class="pane">
-          <div class="pane-header" id="chatHeader">
-            <i class="material-icons">chat</i>
-            <div style="font-weight:700">Chat</div>
-            <span id="headerSubject" class="badge-mini" style="margin-left:8px">No ticket selected</span>
-            <span id="headerStatus" class="status-chip chip-open" style="display:none;margin-left:8px">OPEN</span>
-
-            <!-- Admin actions -->
-            <div id="ticketActions" style="margin-left:auto;display:none;align-items:center;gap:6px">
-              <a id="closeTicketBtn" class="btn-flat waves-effect"><i class="material-icons left">check_circle</i><span id="closeTicketText">Close</span></a>
-              <a id="deleteTicketBtn" class="btn-flat red-text text-darken-1 tooltipped" data-tooltip="Delete ticket"><i class="material-icons">delete_forever</i></a>
-            </div>
-          </div>
-
-          <div class="pane-body" id="chatPane">
-            <div class="messages" id="messages"></div>
-            <div class="typing" id="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
-          </div>
-          <div class="pane-footer">
-            <form id="sendForm" class="sendbar">
-              <input id="msgInput" class="text browser-default" type="text" placeholder="Type a message… (Enter to send)" autocomplete="off" />
-              <select id="statusSelect" class="status browser-default" style="display:none">
-                <option value="open">Open</option>
-                <option value="progress">In Progress</option>
-                <option value="closed">Closed</option>
-              </select>
-              <button id="sendBtn" class="btn-large waves-effect waves-light" type="submit"><i class="material-icons">send</i></button>
-            </form>
+            <small style="color:var(--muted)">Note: These actions affect the database. Use carefully. Students cannot access these tools.</small>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- FAB: New ticket -->
-    <div class="fixed-action-btn">
-      <a id="fabNew" class="btn-floating btn-large teal tooltipped" data-position="left" data-tooltip="New Ticket"><i class="large material-icons">add</i></a>
-    </div>
-  </main>
-
-  <!-- Modal: New Ticket -->
-  <div id="modalNew" class="modal">
-    <div class="modal-content">
-      <h5><i class="material-icons">add_circle</i> New Ticket</h5>
-      <div class="row" style="margin-top:14px">
-        <div class="input-field col s12 m6">
-          <input id="subject" type="text" maxlength="80" />
-          <label for="subject">Subject</label>
-        </div>
-        <div class="input-field col s12 m6">
-          <select id="category">
-            <option value="General" selected>General</option>
-            <option value="Account">Account</option>
-            <option value="Network">Network</option>
-            <option value="Hardware">Hardware</option>
-            <option value="Software">Software</option>
-          </select>
-          <label>Category</label>
-        </div>
-        <div class="input-field col s12">
-          <textarea id="details" class="materialize-textarea" data-length="280"></textarea>
-          <label for="details">Describe your issue</label>
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer"><a href="#!" class="modal-close btn-flat">Cancel</a><a id="createTicket" class="btn">Create</a></div>
+      </section>
+    </main>
   </div>
 
-  <!-- Modal: Profile -->
-  <div id="modalProfile" class="modal">
-    <div class="modal-content">
-      <h5><i class="material-icons">person</i> Profile</h5>
-      <div class="row" style="margin-top:14px">
-        <div class="input-field col s12 m6">
-          <input id="displayName" type="text" maxlength="30" />
-          <label for="displayName">Display name</label>
-        </div>
-        <div class="input-field col s12 m6">
-          <input id="emailHint" type="text" placeholder="optional: email for context" />
-          <label for="emailHint" class="active">Email (optional)</label>
-        </div>
-      </div>
-      <div class="grey-text text-darken-1" style="font-size:.9rem">
-        Role: <b><span id="roleText">User</span></b>
-      </div>
-      <div class="section">
-        <a id="openGateFromProfile" class="btn-flat"><i class="material-icons left">vpn_key</i>Enter / Change Role</a>
-      </div>
-    </div>
-    <div class="modal-footer"><a href="#!" class="modal-close btn-flat">Close</a><a id="saveProfile" class="btn">Save</a></div>
-  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite">Saved.</div>
 
-  <!-- Modal: Access Gate (User/Admin codes) -->
-  <div id="modalGate" class="modal">
-    <div class="modal-content">
-      <h5><i class="material-icons">lock</i> Access</h5>
-      <p class="code-hint">Enter the <b>User code</b> to join chats, or the <b>Admin code</b> to manage tickets.</p>
-      <div class="row" style="margin-top:10px">
-        <div class="input-field col s12 m6">
-          <input id="userCode" type="password" minlength="4" autocomplete="off" />
-          <label for="userCode">User code</label>
-          <a id="enterAsUser" class="btn waves-effect" style="margin-top:6px"><i class="material-icons left">login</i>Enter as User</a>
-        </div>
-        <div class="input-field col s12 m6">
-          <input id="adminCode" type="password" minlength="8" autocomplete="off" />
-          <label for="adminCode">Admin code</label>
-          <a id="enterAsAdmin" class="btn red waves-effect" style="margin-top:6px"><i class="material-icons left">security</i>Enter as Admin</a>
-        </div>
-      </div>
-      <p id="firstRunNote" class="code-hint" style="display:none"><i class="material-icons tiny">info</i> First-time setup: click the shield icon in the top bar to set both codes.</p>
-    </div>
-    <div class="modal-footer"><a href="#!" class="modal-close btn-flat">Close</a></div>
-  </div>
-
-  <!-- Modal: Manage Codes (Admin only or first-run) -->
-  <div id="modalCodes" class="modal">
-    <div class="modal-content">
-      <h5><i class="material-icons">admin_panel_settings</i> Set Access Codes</h5>
-      <p class="code-hint">Codes are <b>hashed with bcrypt</b> and stored in Firestore. Use long, hard-to-guess codes. Leave blank to keep existing.</p>
-      <div class="row" style="margin-top:12px">
-        <div class="input-field col s12 m6">
-          <input id="newUserCode" type="password" minlength="4" autocomplete="off" />
-          <label for="newUserCode">New User code</label>
-        </div>
-        <div class="input-field col s12 m6">
-          <input id="newAdminCode" type="password" minlength="8" autocomplete="off" />
-          <label for="newAdminCode">New Admin code</label>
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <a id="saveCodes" class="btn"><i class="material-icons left">save</i>Save</a>
-      <a href="#!" class="modal-close btn-flat">Close</a>
-    </div>
-  </div>
-
-  <!-- Materialize JS -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-  <!-- bcryptjs (browser global) -->
-  <script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
-
-  <!-- Firebase (modular, CDN) + YOUR CONFIG & INIT -->
+  <!-- Firebase (modular v11) via ESM CDN -->
   <script type="module">
-    // Import the functions you need (CDN module URLs for plain index.html)
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js';
-    import { getAnalytics, isSupported } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-analytics.js';
-
-    // The app uses Auth and Firestore too:
-    import { getAuth, signInAnonymously, onAuthStateChanged, updateProfile }
-      from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js';
+    /* =======================
+       Firebase bootstrapping
+       ======================= */
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js';
+    import { getAnalytics, isSupported as analyticsSupported } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-analytics.js';
     import {
-      getFirestore, collection, addDoc, doc, updateDoc, setDoc, serverTimestamp,
-      query, orderBy, onSnapshot, getDoc, getDocs, deleteDoc
-    } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js';
+      getAuth, onAuthStateChanged, signInAnonymously,
+      signInWithEmailAndPassword, signOut, updateProfile
+    } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
+    import {
+      getFirestore, collection, addDoc, serverTimestamp, query, orderBy,
+      onSnapshot, doc, deleteDoc, updateDoc, getDocs, writeBatch, limit,
+      where
+    } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js';
 
-    // --- Your web app's Firebase configuration (from your snippet) ---
-    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    // Your Firebase configuration (provided by you)
     const firebaseConfig = {
       apiKey: "AIzaSyD4vP74YleiqqpVyIZzCQLqcjWIkcrzlxo",
       authDomain: "mr-oza-helpdesk.firebaseapp.com",
       projectId: "mr-oza-helpdesk",
-      storageBucket: "mr-oza-helpdesk.firebasestorage.app",
+      storageBucket: "mr-oza-helpdesk.firebasestorage.app", // not used (no Storage)
       messagingSenderId: "340032460471",
       appId: "1:340032460471:web:a0a87895948ca769199f32",
       measurementId: "G-PC18TN83WD"
     };
 
-    // Initialize Firebase (exactly like your snippet)
     const app = initializeApp(firebaseConfig);
+    // Analytics is optional; only start if supported to avoid console warnings.
+    try { if (await analyticsSupported()) getAnalytics(app); } catch (e) {}
 
-    // Initialize Analytics (guard so it won't throw on unsupported devices)
-    try { if (await isSupported()) { getAnalytics(app); } } catch (_) {}
+    const auth = getAuth(app);
+    const db   = getFirestore(app);
 
-    // ---- State / helpers ----
-    let auth, db, user, unsubTickets=null, unsubMessages=null;
-    const BCRYPT = window.dcodeIO?.bcrypt || window.bcrypt;
-    const $ = s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
-    const toast=(m,c='')=>M.toast({html:m,displayLength:2400,classes:c});
-    const chip=s=>{const m={open:['OPEN','chip-open'],progress:['IN PROGRESS','chip-progress'],closed:['CLOSED','chip-closed']};return `<span class="status-chip ${m[s]?.[1]||'chip-open'}">${m[s]?.[0]||'OPEN'}</span>`};
-    const escapeHtml = str => String(str).replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]));
-    const tsToDate=ts=>!ts?null:(ts.toDate?ts.toDate():(typeof ts.seconds==='number'?new Date(ts.seconds*1000):null));
-    const fmtRel=d=>{if(!d) return ''; const s=(Date.now()-d.getTime())/1000; if(s<45) return 'just now'; if(s<3600) return Math.floor(s/60)+'m'; if(s<86400) return Math.floor(s/3600)+'h'; return d.toLocaleDateString();};
+    /* =======================
+       Basic UI helpers
+       ======================= */
+    const $ = (sel) => document.querySelector(sel);
+    const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+    const toastEl = $('#toast');
+    const toast = (msg) => { toastEl.textContent = msg; toastEl.classList.add('show'); setTimeout(()=>toastEl.classList.remove('show'), 1600); };
 
-    const state = {
-      isAdmin:false,
-      displayName:localStorage.getItem('hd_name')||'',
-      emailHint:localStorage.getItem('hd_email')||'',
-      activeTicketId:null, activeTicket:null,
-      joinCodes:null,          // { userHash, adminHash }
-      firstRun:false           // true when codes doc missing
-    };
+    // Elements
+    const whoEl = $('#who');
+    const displayNameEl = $('#displayName');
+    const rolePickEl = $('#rolePick');
+    const adminFieldsEl = $('#adminFields');
 
-    document.addEventListener('DOMContentLoaded', ()=>{
-      M.Modal.init($('#modalNew'), {onOpenStart: ()=> M.FormSelect.init($$('select'))});
-      M.Modal.init($('#modalProfile'));
-      M.Modal.init($('#modalGate'));
-      M.Modal.init($('#modalCodes'));
-      M.Tooltip.init($$('.tooltipped'));
-      if(!state.displayName) setTimeout(()=> M.Modal.getInstance($('#modalProfile')).open(), 600);
+    const btnSignIn = $('#btnSignIn');
+    const btnUseSaved = $('#btnUseSaved');
+    const btnSignOut = $('#btnSignOut');
+
+    const chatView = $('#chatView');
+    const ticketsView = $('#ticketsView');
+    const adminView = $('#adminView');
+
+    const tabAdmin = $('#tabAdmin');
+
+    const chatStream = $('#chatStream');
+    const chatInput = $('#chatInput');
+    const btnSend = $('#btnSend');
+
+    const tTitle = $('#tTitle');
+    const tDesc = $('#tDesc');
+    const ticketList = $('#ticketList');
+    const btnAddTicket = $('#btnAddTicket');
+
+    const btnDeleteAllChat = $('#btnDeleteAllChat');
+    const btnDeleteAllTickets = $('#btnDeleteAllTickets');
+    const btnExport = $('#btnExport');
+
+    // Admin recognition (client-side fallback – for convenience only).
+    // For production, set a custom claim `admin:true` via Admin SDK.
+    const ADMIN_EMAILS = [
+      'koza12@unitedcharter.org', // <- add/change your admin emails here
+    ];
+    let isAdmin = false;
+    let currentUser = null;
+
+    // Persist and reuse display name
+    const savedName = localStorage.getItem('helpdesk:name');
+    if (savedName) displayNameEl.value = savedName;
+    $('#btnUseSaved').addEventListener('click', () => {
+      if (savedName) { displayNameEl.value = savedName; toast('Loaded your saved name.'); }
+      else toast('No saved name yet.');
     });
-    $('#btnTheme').addEventListener('click', ()=>{ document.body.classList.toggle('blue-grey'); toast('Theme toggled'); });
 
-    (async function(){
-      try{
-        auth = getAuth(app); db = getFirestore(app);
-        await signInAnonymously(auth);
-        onAuthStateChanged(auth, async u=>{
-          if(!u) return; user=u;
-          if(state.displayName){ try{ await updateProfile(user,{displayName:state.displayName}); }catch(e){} }
-          await computeRole();      // from admins collection
-          await ensureJoinCodes();  // load or set first-run
-          await gateFlow();         // require user/admin code
-          bindUI(); loadTickets();
-        });
-      }catch(err){ console.error(err); toast('Init failed','red'); }
-    })();
+    // Role picker toggles admin email/password fields
+    rolePickEl.addEventListener('change', () => {
+      adminFieldsEl.hidden = rolePickEl.value !== 'admin';
+    });
 
-    // ----- Role / Admin -----
-    async function computeRole(){
-      state.isAdmin = false;
-      try{
-        const d = await getDoc(doc(db,'admins', user.uid));
-        state.isAdmin = d.exists();
-      }catch(e){ state.isAdmin = false; }
-      updateRoleUI();
-    }
-    function updateRoleUI(){
-      const badge = $('#modeBadge');
-      if(state.isAdmin){
-        badge.classList.remove('green'); badge.classList.add('red');
-        badge.setAttribute('data-badge-caption','Admin');
-        $('#roleText').textContent='Admin';
-        $('#statusSelect').style.display='block';
-        $('#btnCodes').style.display='inline-block';
-      }else{
-        badge.classList.remove('red'); badge.classList.add('green');
-        badge.setAttribute('data-badge-caption','User');
-        $('#roleText').textContent='User';
-        $('#statusSelect').style.display='none';
-        // If first run (no codes yet), show the codes button so the first person can set them.
-        $('#btnCodes').style.display = state.firstRun ? 'inline-block' : 'none';
-      }
-    }
+    /* =======================
+       Auth flows
+       ======================= */
+    btnSignIn.addEventListener('click', async () => {
+      const role = rolePickEl.value;
+      const name = (displayNameEl.value || '').trim().slice(0, 40) || 'Guest';
+      localStorage.setItem('helpdesk:name', name);
 
-    async function grantAdmin(){
-      try{
-        await setDoc(doc(db,'admins', user.uid), {
-          createdAt: serverTimestamp(),
-          name: state.displayName || 'Anonymous',
-          email: state.emailHint || ''
-        });
-        await computeRole();
-        toast('Admin access granted ✅','');
-      }catch(err){ toast(err.message,'red'); }
-    }
-
-    // ----- Join Codes (User/Admin) -----
-    async function ensureJoinCodes(){
-      try{
-        const ref = doc(db,'config','joinCodes');
-        const snap = await getDoc(ref);
-        if(!snap.exists()){
-          state.firstRun = true; state.joinCodes = { userHash:null, adminHash:null };
-          $('#firstRunNote').style.display='block';
-          // Let the first visitor set codes
-          M.Modal.getInstance($('#modalCodes')).open();
-        }else{
-          state.firstRun = false; state.joinCodes = snap.data();
-          $('#firstRunNote').style.display='none';
+      try {
+        if (role === 'admin') {
+          const email = $('#adminEmail').value.trim();
+          const pass  = $('#adminPass').value;
+          if (!email || !pass) return toast('Enter admin email and password.');
+          await signInWithEmailAndPassword(auth, email, pass);
+          // Name will be shown as the account displayName if present
+        } else {
+          // Anonymous student/guest sign-in
+          await signInAnonymously(auth);
+          // Set display name on the anonymous user for UI
+          if (auth.currentUser) await updateProfile(auth.currentUser, { displayName: name });
         }
-        updateRoleUI();
-      }catch(err){
-        toast('Failed to load access config','red');
+      } catch (e) {
+        console.error(e); toast('Sign-in failed. Check details and try again.');
       }
-    }
+    });
 
-    async function reloadJoinCodes(){
-      const ref = doc(db,'config','joinCodes');
-      const snap = await getDoc(ref);
-      state.joinCodes = snap.exists()? snap.data() : {userHash:null, adminHash:null};
-      state.firstRun = !snap.exists();
-      updateRoleUI();
-    }
+    btnSignOut.addEventListener('click', async () => {
+      try { await signOut(auth); } catch (e) {}
+    });
 
-    async function saveCodes(){
-      const u = $('#newUserCode').value.trim();
-      const a = $('#newAdminCode').value.trim();
-      if(!u && !a){ toast('Nothing to save'); return; }
-      if(a && a.length < 8){ toast('Admin code must be at least 8 characters','orange'); return; }
+    onAuthStateChanged(auth, async (user) => {
+      currentUser = user;
+      const name = user?.displayName || savedName || 'Guest';
+      whoEl.textContent = name || 'Guest';
+      $('#btnSignOut').hidden = !user;
 
-      try{
-        const ref = doc(db,'config','joinCodes');
-        const existing = (await getDoc(ref)).data() || {};
-        const payload = {};
-        if(u) payload.userHash = BCRYPT.hashSync(u, 10);
-        if(a) payload.adminHash = BCRYPT.hashSync(a, 10);
-        await setDoc(ref, {...existing, ...payload});
-        $('#newUserCode').value=''; $('#newAdminCode').value=''; M.updateTextFields();
-        toast('Codes saved ✅');
-        await reloadJoinCodes();
-        state.firstRun = false;
-      }catch(err){ toast(err.message,'red'); }
-    }
+      // Lightweight admin detection (email match). Secure way uses custom claims.
+      isAdmin = !!(user && user.email && ADMIN_EMAILS.includes(user.email));
+      tabAdmin.hidden = !isAdmin;
 
-    function needUserGate(){
-      // If a userHash exists, require passing the user code once per browser.
-      return !!(state.joinCodes?.userHash) && localStorage.getItem('hd_user_gate_ok')!=='1';
-    }
-
-    async function gateFlow(){
-      // If admin already, allow; otherwise require user code when configured
-      if(state.isAdmin){ return; }
-      if(needUserGate()){
-        M.Modal.getInstance($('#modalGate')).open();
+      // Start/stop listeners based on auth
+      if (user) {
+        startChatListener();
+        startTicketListener();
+      } else {
+        chatStream.innerHTML = '';
+        ticketList.innerHTML = '';
       }
-    }
+    });
 
-    async function verifyUserCode(){
-      if(!state.joinCodes?.userHash){
-        toast('No User code is configured yet. Ask Admin to set it.','orange'); return;
-      }
-      const code = $('#userCode').value;
-      if(!code){ toast('Enter the User code','orange'); return; }
-      try{
-        const ok = BCRYPT.compareSync(code, state.joinCodes.userHash);
-        if(ok){
-          localStorage.setItem('hd_user_gate_ok','1');
-          toast('Access granted (User) ✅');
-          $('#userCode').value=''; M.updateTextFields();
-          M.Modal.getInstance($('#modalGate')).close();
-        }else{
-          toast('Incorrect User code','red');
-        }
-      }catch(e){ toast('Error verifying code','red'); }
-    }
+    /* =======================
+       Chat (Firestore: messages)
+       ======================= */
+    const messagesRef = collection(db, 'messages');
+    let chatUnsub = null;
 
-    async function verifyAdminCode(){
-      if(!state.joinCodes?.adminHash){
-        toast('No Admin code is configured yet. Set it first.','orange'); return;
-      }
-      const code = $('#adminCode').value;
-      if(!code){ toast('Enter the Admin code','orange'); return; }
-      try{
-        const ok = BCRYPT.compareSync(code, state.joinCodes.adminHash);
-        if(ok){
-          $('#adminCode').value=''; M.updateTextFields();
-          await grantAdmin();
-          M.Modal.getInstance($('#modalGate')).close();
-        }else{
-          toast('Incorrect Admin code','red');
-        }
-      }catch(e){ toast('Error verifying code','red'); }
-    }
-
-    // ----- UI Bindings -----
-    function bindUI(){
-      $('#fabNew').addEventListener('click', ()=> M.Modal.getInstance($('#modalNew')).open());
-      $('#createTicket').addEventListener('click', createTicket);
-
-      $('#btnProfile').addEventListener('click', ()=>{
-        $('#displayName').value = state.displayName; M.updateTextFields();
-        $('#emailHint').value = state.emailHint; M.updateTextFields();
-        M.Modal.getInstance($('#modalProfile')).open();
-      });
-      $('#saveProfile').addEventListener('click', saveProfile);
-      $('#openGateFromProfile').addEventListener('click', ()=> M.Modal.getInstance($('#modalGate')).open());
-      $('#refreshTickets').addEventListener('click', loadTickets);
-      $('#seedData').addEventListener('click', seedDemo);
-      $('#sendForm').addEventListener('submit', sendMessage);
-      $('#msgInput').addEventListener('input', ()=>{ clearTimeout(window.__tt); $('#typing').style.display='flex'; window.__tt=setTimeout(()=>$('#typing').style.display='none',900) });
-      $('#msgInput').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); $('#sendForm').requestSubmit(); } });
-      $('#statusSelect').addEventListener('change', async e=>{
-        if(!state.activeTicketId) return;
-        try{ await updateDoc(doc(db,'tickets',state.activeTicketId), {status:e.target.value}); toast('Status updated'); }
-        catch(err){ toast(err.message,'red'); }
-      });
-      $('#closeTicketBtn').addEventListener('click', toggleCloseTicket);
-      $('#deleteTicketBtn').addEventListener('click', deleteTicket);
-      $('#messages').addEventListener('click', async (e)=>{
-        const btn = e.target.closest('.bubble-actions'); if(!btn || !state.activeTicketId) return;
-        const mid = btn.dataset.mid; if(!mid) return;
-        if(!confirm('Delete this message?')) return;
-        try{ await deleteDoc(doc(db,'tickets',state.activeTicketId,'messages',mid)); toast('Message deleted'); }
-        catch(err){ toast(err.message,'red'); }
-      });
-
-      // Codes & Gate
-      $('#btnCodes').addEventListener('click', ()=> M.Modal.getInstance($('#modalCodes')).open());
-      $('#saveCodes').addEventListener('click', saveCodes);
-      $('#enterAsUser').addEventListener('click', verifyUserCode);
-      $('#enterAsAdmin').addEventListener('click', verifyAdminCode);
-    }
-
-    // ----- Tickets / Chat -----
-    function ticketItemTemplate(t){
-      const lastAt = fmtRel(tsToDate(t.lastAt));
-      const lastMsg = escapeHtml(t.lastMessage||'');
-      return `
-      <li class="ticket-item collection-item ${state.activeTicketId===t.id?'active-ticket':''}" data-id="${t.id}">
-        <div style="display:flex; align-items:center; gap:10px">
-          <i class="material-icons">confirmation_number</i>
-          <div style="flex:1;min-width:0">
-            <div class="ticket-title">${escapeHtml(t.subject||'(no subject)')}</div>
-            <div class="ticket-sub">
-              <span>${escapeHtml(t.category||'General')}</span>
-              <span>• by ${escapeHtml(t.creatorName||'Anon')}</span>
-              ${lastAt?`<span>• ${lastAt}</span>`:''}
-            </div>
-            ${lastMsg?`<div class="grey-text text-darken-1" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${lastMsg}</div>`:''}
-          </div>
-          ${chip(t.status||'open')}
-        </div>
-      </li>`;
-    }
-
-    async function loadTickets(){
-      if(unsubTickets){ unsubTickets(); unsubTickets=null; }
-      $('#ticketList').innerHTML = '<li class="collection-item skeleton" style="height:64px"></li><li class="collection-item skeleton" style="height:64px"></li>';
-      const qAll = query(collection(db,'tickets'), orderBy('createdAt','desc'));
-      unsubTickets = onSnapshot(qAll, snap=>{
-        const items = [];
-        snap.forEach(d=>{
-          const t = { id:d.id, ...d.data() };
-          if(state.isAdmin || t.creatorUid===user?.uid) items.push(ticketItemTemplate(t));
+    function startChatListener(){
+      if (chatUnsub) chatUnsub();
+      const q = query(messagesRef, orderBy('createdAt', 'asc'), limit(300));
+      chatUnsub = onSnapshot(q, (snap) => {
+        chatStream.innerHTML = '';
+        snap.forEach(docSnap => {
+          const m = docSnap.data();
+          const isMe = currentUser && m.uid === currentUser.uid;
+          const bubble = document.createElement('div');
+          bubble.className = 'bubble' + (isMe ? ' me' : '') + (m.role === 'admin' ? ' admin' : '');
+          const meta = document.createElement('div'); meta.className = 'meta';
+          const time = m.createdAt?.toDate ? m.createdAt.toDate() : new Date();
+          meta.innerHTML = `<span class="icon">person</span>${escapeHtml(m.name||'Unknown')} · ${time.toLocaleString()}` +
+                           (isAdmin ? ` · <button data-id="${docSnap.id}" class="btn ghost" style="padding:2px 6px; font-size:12px;">Delete</button>` : '');
+          const msg = document.createElement('div'); msg.className = 'msg'; msg.textContent = m.text || '';
+          bubble.appendChild(meta); bubble.appendChild(msg);
+          chatStream.appendChild(bubble);
         });
-        $('#ticketList').innerHTML = items.join('') || '<li class="collection-item">No tickets yet. Click + to create one, or press Demo.</li>';
-        $$('#ticketList .ticket-item').forEach(li=> li.addEventListener('click', ()=> openTicket(li.dataset.id)) );
-      }, err=> toast(err.message,'red'));
-      updateRoleUI();
+        chatStream.scrollTop = chatStream.scrollHeight;
+        // Wire up delete buttons (admin only)
+        if (isAdmin) {
+          chatStream.querySelectorAll('button[data-id]').forEach(btn => {
+            btn.onclick = async () => {
+              if (!confirm('Delete this message?')) return;
+              await deleteDoc(doc(db, 'messages', btn.dataset.id));
+            };
+          });
+        }
+      });
     }
 
-    async function createTicket(){
-      if(needUserGate()){ M.Modal.getInstance($('#modalGate')).open(); return; }
-      const subject = $('#subject').value.trim();
-      const category = $('#category').value;
-      const details = $('#details').value.trim();
-      if(!subject){ toast('Please add a subject','orange'); return; }
-      try{
-        const ref = await addDoc(collection(db,'tickets'),{
-          subject, category, details, status:'open', priority:'normal',
-          lastMessage:'', lastAt: serverTimestamp(),
-          creatorUid: user?.uid || null, creatorName: state.displayName || 'Anonymous',
+    btnSend.addEventListener('click', () => sendMessage());
+    chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+    async function sendMessage(){
+      const text = (chatInput.value || '').trim();
+      if (!currentUser) return toast('Please sign in first.');
+      if (!text) return; 
+      try {
+        await addDoc(messagesRef, {
+          text: text.slice(0, 500),
+          uid: currentUser.uid,
+          name: currentUser.displayName || 'Guest',
+          role: isAdmin ? 'admin' : 'student',
           createdAt: serverTimestamp()
         });
-        toast('Ticket created ✅');
-        M.Modal.getInstance($('#modalNew')).close();
-        openTicket(ref.id);
-      }catch(err){ toast(err.message,'red'); }
+        chatInput.value = '';
+      } catch (e) { console.error(e); toast('Could not send. Try again.'); }
     }
 
-    async function openTicket(id){
-      if(needUserGate()){ M.Modal.getInstance($('#modalGate')).open(); return; }
-      state.activeTicketId = id;
-      $$('#ticketList .ticket-item').forEach(el=> el.classList.toggle('active-ticket', el.dataset.id===id));
-      if(unsubMessages){ unsubMessages(); unsubMessages=null; }
-      $('#messages').innerHTML='';
+    /* =======================
+       Tickets (Firestore: tickets)
+       ======================= */
+    const ticketsRef = collection(db, 'tickets');
+    let ticketsUnsub = null;
 
-      try{
-        const tdoc = await getDoc(doc(db,'tickets',id));
-        state.activeTicket = { id, ...tdoc.data() };
-        $('#headerSubject').innerText = state.activeTicket.subject || '(no subject)';
-        const st = state.activeTicket.status || 'open';
-        const headerStatus = $('#headerStatus');
-        headerStatus.style.display='inline-block';
-        headerStatus.className = 'status-chip ' + (st==='open'?'chip-open': st==='progress'?'chip-progress':'chip-closed');
-        headerStatus.textContent = st.toUpperCase();
-
-        const canModerate = state.isAdmin || (state.activeTicket.creatorUid === user?.uid);
-        $('#ticketActions').style.display = canModerate ? 'flex' : 'none';
-        $('#closeTicketText').textContent = (st === 'closed') ? 'Reopen' : 'Close';
-        $('#statusSelect').style.display = state.isAdmin ? 'block' : 'none';
-        if(state.isAdmin) $('#statusSelect').value = st;
-      }catch(e){ toast(e.message,'red'); }
-
-      const qMsgs = query(collection(db,'tickets',id,'messages'), orderBy('createdAt','asc'));
-      unsubMessages = onSnapshot(qMsgs, snap=>{
-        const frag = document.createDocumentFragment();
-        snap.docChanges().forEach(ch=>{
-          if(ch.type==='added'){ frag.appendChild(renderMessage({ id: ch.doc.id, ...ch.doc.data() })); }
-        });
-        $('#messages').appendChild(frag);
-        const pane = $('#chatPane'); pane.scrollTop = pane.scrollHeight;
+    function startTicketListener(){
+      if (ticketsUnsub) ticketsUnsub();
+      const q = query(ticketsRef, orderBy('createdAt','desc'), limit(200));
+      ticketsUnsub = onSnapshot(q, (snap) => {
+        ticketList.innerHTML = '';
+        snap.forEach(docSnap => renderTicket(docSnap.id, docSnap.data()));
       });
     }
 
-    function renderMessage(m){
-      const mine = m.uid === user?.uid;
-      const canDelete = mine || state.isAdmin;
-      const ts = tsToDate(m.createdAt);
-      const when = ts ? ts.toLocaleString() : '';
-      const wrap = document.createElement('div');
-      wrap.className = 'bubble ' + (mine?'me':'them');
-      wrap.innerHTML = `
-        ${canDelete ? `<span class="bubble-actions" data-mid="${m.id}" title="Delete"><i class="material-icons">delete</i></span>` : ``}
-        ${escapeHtml(m.text||'')}
-        <div class="meta">${escapeHtml(m.name||'Anon')}${m.email? ' • '+escapeHtml(m.email): ''}${when? ' • '+escapeHtml(when):''}</div>
+    function renderTicket(id, t){
+      const card = document.createElement('div'); card.className = 'ticket';
+      const statusClass = 'status-' + (t.status||'Open').replace(' ','\\ ');
+      card.innerHTML = `
+        <div style="display:flex; gap:8px; align-items:center; justify-content:space-between;">
+          <div class="chip ${statusClass}"><span class="icon">flag</span>${escapeHtml(t.status||'Open')}</div>
+          <div style="font-size:12px; color:var(--muted);">${new Date((t.updatedAt?.toDate?.()||t.createdAt?.toDate?.()||new Date())).toLocaleString()}</div>
+        </div>
+        <div style="font-weight:700; font-size:15px;">${escapeHtml(t.title||'Untitled')}</div>
+        <div style="color:var(--muted);">${escapeHtml(t.desc||'')}</div>
+        <div style="font-size:12px; color:var(--muted);">By ${escapeHtml(t.creatorName||'Unknown')}</div>
+        <div class="ticket-actions">
+          <button class="btn ghost" data-act="prog"><span class="icon">play_arrow</span> In&nbsp;Progress</button>
+          <button class="btn okay" data-act="close"><span class="icon">check_circle</span> Close</button>
+          ${(isAdmin || (currentUser && currentUser.uid===t.creatorUid)) ? `<button class="btn danger" data-act="del"><span class="icon">delete</span> Delete</button>` : ''}
+        </div>
       `;
-      return wrap;
+      // Wire actions
+      card.querySelectorAll('button').forEach(btn => {
+        btn.onclick = async () => {
+          if (btn.dataset.act === 'prog') await setTicketStatus(id, 'In Progress');
+          if (btn.dataset.act === 'close') await setTicketStatus(id, 'Closed');
+          if (btn.dataset.act === 'del') {
+            if (!confirm('Delete this ticket?')) return;
+            await deleteDoc(doc(db, 'tickets', id));
+          }
+        };
+      });
+      ticketList.appendChild(card);
     }
 
-    async function sendMessage(e){
-      e.preventDefault();
-      if(needUserGate()){ M.Modal.getInstance($('#modalGate')).open(); return; }
-      if(!state.activeTicketId){ toast('Select or create a ticket to chat.','orange'); return; }
-      const text = $('#msgInput').value.trim(); if(!text) return;
-      try{
-        await addDoc(collection(db,'tickets',state.activeTicketId,'messages'),{
-          uid:user?.uid||null, name: state.displayName||'Anonymous', email: state.emailHint||'',
-          role: state.isAdmin ? 'admin' : 'user',
-          text, createdAt: serverTimestamp()
-        });
-        try{ await updateDoc(doc(db,'tickets',state.activeTicketId), { lastMessage:text, lastAt: serverTimestamp() }); }catch(_){}
-        $('#msgInput').value='';
-      }catch(err){ toast(err.message,'red'); }
+    async function setTicketStatus(id, status){
+      const ref = doc(db, 'tickets', id);
+      await updateDoc(ref, { status, updatedAt: serverTimestamp() });
+      toast(`Ticket marked ${status}.`);
     }
 
-    async function toggleCloseTicket(){
-      if(!state.activeTicketId) return;
-      const cur = state.activeTicket?.status || 'open';
-      const next = (cur === 'closed') ? 'open' : 'closed';
-      try{
-        await updateDoc(doc(db,'tickets',state.activeTicketId), {
-          status: next, lastAt: serverTimestamp(),
-          lastMessage: next==='closed' ? 'Ticket closed' : 'Ticket reopened'
+    btnAddTicket.addEventListener('click', async () => {
+      if (!currentUser) return toast('Please sign in first.');
+      const title = (tTitle.value||'').trim();
+      const desc  = (tDesc.value||'').trim();
+      if (!title) return toast('Enter a title.');
+      try {
+        await addDoc(ticketsRef, {
+          title: title.slice(0,80),
+          desc:  desc.slice(0,200),
+          status: 'Open',
+          creatorUid: currentUser.uid,
+          creatorName: currentUser.displayName || 'Guest',
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
         });
-        toast(next==='closed' ? 'Ticket closed' : 'Ticket reopened');
-      }catch(err){ toast(err.message,'red'); }
-    }
-
-    async function deleteTicket(){
-      if(!state.activeTicketId) return;
-      if(!confirm('Delete this ticket and ALL its messages?')) return;
-      try{
-        const snap = await getDocs(collection(db,'tickets',state.activeTicketId,'messages'));
-        for(const d of snap.docs){ await deleteDoc(d.ref); }
-        await deleteDoc(doc(db,'tickets',state.activeTicketId));
-        state.activeTicketId=null; state.activeTicket=null;
-        $('#messages').innerHTML=''; $('#headerSubject').innerText='No ticket selected';
-        $('#headerStatus').style.display='none'; $('#ticketActions').style.display='none';
-        toast('Ticket deleted');
-      }catch(err){ toast(err.message,'red'); }
-    }
-
-    async function seedDemo(){
-      if(needUserGate()){ M.Modal.getInstance($('#modalGate')).open(); return; }
-      try{
-        const t1 = await addDoc(collection(db,'tickets'),{
-          subject:'Wi-Fi not connecting', category:'Network', details:'Laptop keeps dropping campus Wi-Fi.',
-          status:'open', creatorUid:user?.uid||null, creatorName: state.displayName || 'Anonymous',
-          createdAt: serverTimestamp(), lastMessage:'Having trouble since morning', lastAt: serverTimestamp()
-        });
-        await addDoc(collection(db,'tickets',t1.id,'messages'),{
-          uid:user?.uid||null,name:state.displayName||'Anonymous', text:'Having trouble since morning', createdAt: serverTimestamp()
-        });
-
-        const t2 = await addDoc(collection(db,'tickets'),{
-          subject:'Install MS Office', category:'Software', details:'Need Office on Lab PC 12.',
-          status:'progress', creatorUid:user?.uid||null, creatorName: state.displayName || 'Anonymous',
-          createdAt: serverTimestamp(), lastMessage:'We will install by 4pm', lastAt: serverTimestamp()
-        });
-        await addDoc(collection(db,'tickets',t2.id,'messages'),{
-          uid:null, name:'Agent', text:'We will install by 4pm', createdAt: serverTimestamp()
-        });
-        toast('Demo tickets added');
-      }catch(e){ toast(e.message,'red'); }
-    }
-
-    // Safety: make code buttons work even if bindUI hasn't run yet
-    document.addEventListener('click', (e)=>{
-      if(e.target && e.target.id === 'saveCodes') saveCodes();
-      if(e.target && e.target.id === 'enterAsUser') verifyUserCode();
-      if(e.target && e.target.id === 'enterAsAdmin') verifyAdminCode();
+        tTitle.value = ''; tDesc.value = '';
+        toast('Ticket added.');
+      } catch (e){ console.error(e); toast('Could not add ticket.'); }
     });
+
+    /* =======================
+       Admin bulk tools
+       ======================= */
+    btnDeleteAllChat.addEventListener('click', async () => {
+      if (!isAdmin) return toast('Admin only.');
+      if (!confirm('Delete ALL chat messages? This cannot be undone.')) return;
+      await bulkDelete('messages');
+      toast('All chat deleted.');
+    });
+
+    btnDeleteAllTickets.addEventListener('click', async () => {
+      if (!isAdmin) return toast('Admin only.');
+      if (!confirm('Delete ALL tickets? This cannot be undone.')) return;
+      await bulkDelete('tickets');
+      toast('All tickets deleted.');
+    });
+
+    btnExport.addEventListener('click', async () => {
+      if (!isAdmin) return toast('Admin only.');
+      const data = {};
+      data.messages = await dumpCollection('messages');
+      data.tickets  = await dumpCollection('tickets');
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `helpdesk-export-${new Date().toISOString().slice(0,19)}.json`;
+      a.click();
+    });
+
+    async function dumpCollection(name){
+      const out = [];
+      const q = query(collection(db, name), limit(1000));
+      const snap = await getDocs(q);
+      snap.forEach(d => out.push({ id:d.id, ...d.data() }));
+      return out;
+    }
+
+    async function bulkDelete(name){
+      const ref = collection(db, name);
+      let snap = await getDocs(query(ref, limit(500)));
+      while (!snap.empty) {
+        const batch = writeBatch(db);
+        snap.forEach(d => batch.delete(d.ref));
+        await batch.commit();
+        snap = await getDocs(query(ref, limit(500)));
+      }
+    }
+
+    /* =======================
+       View switching
+       ======================= */
+    $$('.tab').forEach(tab => tab.addEventListener('click', () => {
+      $$('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      $$('.view').forEach(v => v.classList.remove('active'));
+      const v = document.getElementById(tab.dataset.view);
+      if (v) v.classList.add('active');
+    }));
+
+    /* =======================
+       Utilities
+       ======================= */
+    function escapeHtml(str=''){
+      return str.replace(/[&<>"']/g, (c)=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+    }
   </script>
+
+  <!--
+  ======================================================
+  🔒 Recommended Firestore security rules (paste in Rules)
+  ======================================================
+  rules_version = '2';
+  service cloud.firestore {
+    match /databases/{database}/documents {
+      function isAdmin() { return request.auth.token.admin == true; }
+
+      match /messages/{id} {
+        allow read: if true; // anyone can read chat history
+        allow create: if request.auth != null; // signed-in users can post
+        allow update, delete: if isAdmin() || request.auth.uid == resource.data.uid;
+      }
+
+      match /tickets/{id} {
+        allow read: if true;
+        allow create: if request.auth != null;
+        allow update, delete: if isAdmin() || request.auth.uid == resource.data.creatorUid;
+      }
+    }
+  }
+
+  👉 How to enable admin securely: use Firebase Admin SDK (server/Cloud Function) to set a custom claim on your admin user:
+     admin.auth().setCustomUserClaims('<ADMIN_UID>', { admin: true })
+  Then re‑authenticate the admin account so request.auth.token.admin is present.
+
+  Client‑side ADMIN_EMAILS is for convenience only (not secure). Do not rely on it for production.
+  -->
 </body>
 </html>
