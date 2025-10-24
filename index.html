@@ -1,5 +1,4 @@
-# Update: single-file index with **code-based access**, **Add Ticket**, and **Student can Update Ticket** via an Edit modal.
-# Includes embedded Firebase config from the user, History logging for edits, and Firestore rules.
+# Rebuild a clean single-file index.html with code-based access, student edits, admin controls, and credit.
 html = r"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -268,11 +267,9 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/config/app).data.adminAccessCode;
     }
 
-    // Profiles
     match /profiles/{uid} {
       allow read: if isAdmin() || (isSignedIn() && request.auth.uid == uid);
 
-      // Create own profile with correct code (role must match code)
       allow create: if isSignedIn()
                     && request.auth.uid == uid
                     && (
@@ -281,7 +278,6 @@ service cloud.firestore {
                     )
                     && request.resource.data.disabled == false;
 
-      // User can edit only displayName; Admin can edit anything
       allow update: if isAdmin()
         || (isSignedIn() && request.auth.uid == uid
             && request.resource.data.displayName is string
@@ -292,23 +288,22 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // Tickets
     match /tickets/{id} {
       allow read: if isSignedIn() && (isAdmin() || resource.data.ownerUid == request.auth.uid);
 
-      // Students can create and update their own (while not resolved); Admins can do all
       allow create: if isSignedIn() && (isAdmin() || isStudent());
+
       allow update: if isSignedIn() && (
         isAdmin()
         || (request.auth.uid == resource.data.ownerUid && resource.data.status != "resolved")
       );
+
       allow delete: if isSignedIn() && (
         isAdmin()
         || (request.auth.uid == resource.data.ownerUid && resource.data.status != "resolved")
       );
     }
 
-    // History
     match /history/{hid} {
       allow read: if isSignedIn() && (
         isAdmin()
@@ -319,14 +314,12 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
-    // Config
     match /config/{doc} {
       allow read: if isAdmin(); // Codes hidden from non-admins
       allow write: if isAdmin();
     }
   }
 }</code></pre>
-      <div class="grey-text small">Create Firestore doc <code>config/app</code> with fields: <code>title</code> (string), <code>studentAccessCode</code> (string), <code>adminAccessCode</code> (string).</div>
     </details>
 
     <!-- Provided Firebase config (your snippet) -->
@@ -438,7 +431,6 @@ const analytics = getAnalytics(app);</code></pre>
     const editSave    = $$('#editSave');
     let editDocId     = null;
 
-    let isAdmin = false;
     let profile = null;
     const ticketsCache = new Map(); // id -> ticket data
 
@@ -463,7 +455,7 @@ const analytics = getAnalytics(app);</code></pre>
         roleEl.textContent = '—';
       }
 
-      // Admin-only read of config title
+      // Admin-only read of config title (students can't read config; ignore if denied)
       try {
         const cfgSnap = await getDoc(doc(db, 'config', 'app'));
         if (cfgSnap.exists()) {
@@ -476,12 +468,10 @@ const analytics = getAnalytics(app);</code></pre>
       bindTickets(user);
       bindHistory(user);
       if (profile && profile.role === 'admin') {
-        isAdmin = true;
         bindStudents();
         try { await loadSettingsForm(); } catch {}
         cfgTitle.disabled = false; cfgStudentCode.disabled = false; cfgAdminCode.disabled = false;
       } else {
-        isAdmin = false;
         studentsList.innerHTML = '<li class="collection-item">Students tab is for admins only.</li>';
         cfgTitle.disabled = true; cfgStudentCode.disabled = true; cfgAdminCode.disabled = true;
       }
@@ -631,7 +621,6 @@ const analytics = getAnalytics(app);</code></pre>
               });
               toast('Status updated.');
             } else if (act === 'edit') {
-              // open modal prefilled
               editDocId = id;
               const cur = ticketsCache.get(id) || t;
               eTitle.value = cur.title || '';
@@ -820,7 +809,6 @@ const analytics = getAnalytics(app);</code></pre>
 </body>
 </html>
 """
-path = "/mnt/data/index-code-access-helpdesk-edit.html"
-with open(path, "w") as f:
+with open("/mnt/data/index.html", "w") as f:
     f.write(html)
-path
+print("/mnt/data/index.html")
