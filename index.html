@@ -1,16 +1,16 @@
-# Create updated single-file HTML with a visible credit: "This website developed by MR.OZA"
+# Update: single-file index with **code-based access**, **Add Ticket**, and **Student can Update Ticket** via an Edit modal.
+# Includes embedded Firebase config from the user, History logging for edits, and Firestore rules.
 html = r"""<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AOIT Live Helpdesk — Mr Oza</title>
-  <meta name="description" content="Live Helpdesk with Material Design UI, 3D animation, realtime tickets, history, and role-select login (Teacher/Student). Admin controls for Mr Oza. This website developed by MR.OZA." />
+  <title>AOIT Live Helpdesk — Code Access</title>
+  <meta name="description" content="Live Helpdesk with Material Design UI, realtime tickets, history, and code-based access (Student / Teacher-Admin). Students can add and update tickets. This website developed by MR.OZA." />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <style>
     * { box-sizing: border-box; }
     body { font-family: Roboto, system-ui, -apple-system, Segoe UI, Arial, sans-serif; }
@@ -52,10 +52,10 @@ html = r"""<!DOCTYPE html>
       <div class="card hoverable" id="heroCard">
         <div class="card-content">
           <span class="card-title">
-            Welcome to <b>AOIT & Computer Science</b> Helpdesk — <b>Mr Oza</b>
+            Welcome to <b>AOIT & Computer Science</b> Helpdesk — Code Access
           </span>
           <p class="grey-text">
-            Realtime tickets. Clean Material UI. Admin controls for teachers.
+            Realtime tickets. Clean Material UI. Admin controls for teachers — no email login, enter with a code.
           </p>
           <div class="mt-8 subtle">
             <span class="pill"><i class="material-icons tiny">person</i> Signed in as: <b id="whoami">—</b></span>
@@ -66,66 +66,53 @@ html = r"""<!DOCTYPE html>
       </div>
     </div>
 
-    <!-- Role-select Login + Student Sign Up -->
+    <!-- CODE ACCESS -->
     <div class="row">
+      <!-- STUDENT ACCESS -->
       <div class="col s12 m6">
         <div class="card">
           <div class="card-content">
-            <span class="card-title">Login</span>
-            <form id="roleLoginForm" autocomplete="on">
+            <span class="card-title">Enter as Student (Code)</span>
+            <form id="studentCodeForm" autocomplete="on">
               <div class="input-field">
-                <select id="roleSelect" required>
-                  <option value="student" selected>Student</option>
-                  <option value="teacher">Teacher</option>
-                </select>
-                <label for="roleSelect">I am</label>
+                <input id="stName" type="text" required>
+                <label for="stName">Your Name</label>
               </div>
               <div class="input-field">
-                <input id="email" type="email" required>
-                <label for="email">Email</label>
-              </div>
-              <div class="input-field">
-                <input id="password" type="password" required>
-                <label for="password">Password</label>
+                <input id="stCode" type="text" required>
+                <label for="stCode">Student Access Code</label>
               </div>
               <button class="btn waves-effect waves-light teal" type="submit">
-                Sign In <i class="material-icons right">login</i>
+                Enter <i class="material-icons right">login</i>
               </button>
             </form>
             <p class="grey-text small mt-8">
-              Choose <b>Teacher</b> if you’re Mr Oza or another instructor. Teacher accounts must be granted <code>admin: true</code> via a one-time Node script.
+              Students: get the access code from <b>MR.OZA</b>. You’ll join anonymously and can create and update your own tickets.
             </p>
           </div>
         </div>
       </div>
 
+      <!-- TEACHER / ADMIN ACCESS -->
       <div class="col s12 m6">
         <div class="card">
           <div class="card-content">
-            <span class="card-title">Student Sign Up</span>
-            <form id="signUpForm" autocomplete="on">
+            <span class="card-title">Enter as Teacher / Admin (Code)</span>
+            <form id="adminCodeForm" autocomplete="on">
               <div class="input-field">
-                <input id="upName" type="text" required>
-                <label for="upName">Full Name</label>
+                <input id="adName" type="text" required>
+                <label for="adName">Your Name</label>
               </div>
               <div class="input-field">
-                <input id="upEmail" type="email" required>
-                <label for="upEmail">Email</label>
-              </div>
-              <div class="input-field">
-                <input id="upPassword" type="password" minlength="6" required>
-                <label for="upPassword">Password (6+ chars)</label>
-              </div>
-              <div class="input-field">
-                <input id="joinCode" type="text" required>
-                <label for="joinCode">Class Join Code</label>
+                <input id="adCode" type="text" required>
+                <label for="adCode">Teacher/Admin Access Code</label>
               </div>
               <button class="btn waves-effect waves-light teal" type="submit">
-                Create Account <i class="material-icons right">person_add</i>
+                Enter as Admin <i class="material-icons right">lock_open</i>
               </button>
             </form>
-            <p class="grey-text small grey-outline mt-8">
-              Students: get the join code from <b>Mr Oza</b>. It’s required to create your account.
+            <p class="grey-text small mt-8">
+              Admins can manage students, settings, and any ticket. Share the admin code only with trusted instructors.
             </p>
           </div>
         </div>
@@ -202,8 +189,12 @@ html = r"""<!DOCTYPE html>
                   <label for="cfgTitle">Header Title</label>
                 </div>
                 <div class="input-field">
-                  <input id="cfgJoinCode" type="text" required>
-                  <label for="cfgJoinCode">Class Join Code</label>
+                  <input id="cfgStudentCode" type="text" required>
+                  <label for="cfgStudentCode">Student Access Code</label>
+                </div>
+                <div class="input-field">
+                  <input id="cfgAdminCode" type="text" required>
+                  <label for="cfgAdminCode">Teacher/Admin Access Code</label>
                 </div>
                 <button class="btn waves-effect waves-light teal" type="submit">
                   Save Settings <i class="material-icons right">save</i>
@@ -216,10 +207,30 @@ html = r"""<!DOCTYPE html>
 
       <div class="section center grey-text footer-note">
         <small class="credit">This website developed by MR.OZA</small><br/>
-        <small>Welcome to AOIT and all Computer Science classes • Created by <b>Mr Oza</b></small>
+        <small>Welcome to AOIT and all Computer Science classes</small>
       </div>
     </div>
 
+    <!-- Edit Ticket Modal -->
+    <div id="editModal" class="modal">
+      <div class="modal-content">
+        <h5>Edit Ticket</h5>
+        <div class="input-field">
+          <input id="eTitle" type="text" required>
+          <label for="eTitle">Title</label>
+        </div>
+        <div class="input-field">
+          <textarea id="eDetail" class="materialize-textarea" required></textarea>
+          <label for="eDetail">Detail</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a href="#!" class="modal-close btn-flat">Cancel</a>
+        <a href="#!" id="editSave" class="btn teal">Save changes</a>
+      </div>
+    </div>
+
+    <!-- Firestore Rules (code-verified roles; NO Storage) -->
     <details class="mt-8">
       <summary><b>Firestore Security Rules (copy/paste)</b></summary>
       <pre><code>rules_version = '2';
@@ -227,35 +238,66 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     function isSignedIn() { return request.auth != null; }
-    function isAdmin()    { return isSignedIn() && request.auth.token.admin == true; }
-    function classJoinCode() {
-      return get(/databases/$(database)/documents/config/app).data.classJoinCode;
+
+    function hasProfile(uid) {
+      return exists(/databases/$(database)/documents/profiles/$(uid));
     }
 
+    function userProfile(uid) {
+      return get(/databases/$(database)/documents/profiles/$(uid)).data;
+    }
+
+    function isAdmin() {
+      return isSignedIn()
+             && hasProfile(request.auth.uid)
+             && userProfile(request.auth.uid).role == "admin"
+             && userProfile(request.auth.uid).disabled != true;
+    }
+
+    function isStudent() {
+      return isSignedIn()
+             && hasProfile(request.auth.uid)
+             && userProfile(request.auth.uid).role == "student"
+             && userProfile(request.auth.uid).disabled != true;
+    }
+
+    function studentCode() {
+      return get(/databases/$(database)/documents/config/app).data.studentAccessCode;
+    }
+    function adminCode() {
+      return get(/databases/$(database)/documents/config/app).data.adminAccessCode;
+    }
+
+    // Profiles
     match /profiles/{uid} {
       allow read: if isAdmin() || (isSignedIn() && request.auth.uid == uid);
+
+      // Create own profile with correct code (role must match code)
       allow create: if isSignedIn()
                     && request.auth.uid == uid
-                    && request.resource.data.role == "student"
-                    && request.resource.data.classCode == classJoinCode()
-                    && !("admin" in request.resource.data);
+                    && (
+                      (request.resource.data.role == "student" && request.resource.data.entryCode == studentCode())
+                      || (request.resource.data.role == "admin" && request.resource.data.entryCode == adminCode())
+                    )
+                    && request.resource.data.disabled == false;
+
+      // User can edit only displayName; Admin can edit anything
       allow update: if isAdmin()
         || (isSignedIn() && request.auth.uid == uid
             && request.resource.data.displayName is string
             && request.resource.data.role == resource.data.role
-            && request.resource.data.classCode == resource.data.classCode
+            && request.resource.data.entryCode == resource.data.entryCode
             && request.resource.data.disabled == resource.data.disabled
             && request.resource.data.createdAt == resource.data.createdAt);
       allow delete: if isAdmin();
     }
 
+    // Tickets
     match /tickets/{id} {
       allow read: if isSignedIn() && (isAdmin() || resource.data.ownerUid == request.auth.uid);
-      allow create: if isSignedIn() && (
-        isAdmin()
-        || (exists(/databases/$(database)/documents/profiles/$(request.auth.uid))
-            && get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.disabled != true)
-      );
+
+      // Students can create and update their own (while not resolved); Admins can do all
+      allow create: if isSignedIn() && (isAdmin() || isStudent());
       allow update: if isSignedIn() && (
         isAdmin()
         || (request.auth.uid == resource.data.ownerUid && resource.data.status != "resolved")
@@ -266,58 +308,69 @@ service cloud.firestore {
       );
     }
 
+    // History
     match /history/{hid} {
       allow read: if isSignedIn() && (
         isAdmin()
         || (resource.data.ownerUid == request.auth.uid)
         || (resource.data.actorUid == request.auth.uid)
       );
-      allow create: if isSignedIn() && (
-        isAdmin()
-        || (request.resource.data.actorUid == request.auth.uid)
-      );
+      allow create: if isSignedIn() && (isAdmin() || isStudent());
       allow update, delete: if false;
     }
 
+    // Config
     match /config/{doc} {
-      allow read: if isSignedIn();
+      allow read: if isAdmin(); // Codes hidden from non-admins
       allow write: if isAdmin();
     }
   }
 }</code></pre>
+      <div class="grey-text small">Create Firestore doc <code>config/app</code> with fields: <code>title</code> (string), <code>studentAccessCode</code> (string), <code>adminAccessCode</code> (string).</div>
     </details>
 
+    <!-- Provided Firebase config (your snippet) -->
     <details class="mt-8">
-      <summary><b>Admin claim script (run once locally)</b></summary>
-      <pre><code>// setAdminClaim.js (Node)
-const admin = require('firebase-admin');
-const sa = require('./serviceAccountKey.json');
-admin.initializeApp({ credential: admin.credential.cert(sa) });
-(async () => {
-  const email = process.argv[2];
-  if (!email) { console.error('Usage: node setAdminClaim.js "teacher@example.com"'); process.exit(1); }
-  const user = await admin.auth().getUserByEmail(email);
-  await admin.auth().setCustomUserClaims(user.uid, { admin: true });
-  console.log('Admin set for', email, 'UID:', user.uid, '\\nSign out/in to refresh token.');
-})();</code></pre>
+      <summary><b>Embedded Firebase config (from you)</b></summary>
+      <pre><code>// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyD4vP74YleiqqpVyIZzCQLqcjWIkcrzlxo",
+  authDomain: "mr-oza-helpdesk.firebaseapp.com",
+  projectId: "mr-oza-helpdesk",
+  storageBucket: "mr-oza-helpdesk.firebasestorage.app",
+  messagingSenderId: "340032460471",
+  appId: "1:340032460471:web:a0a87895948ca769199f32",
+  measurementId: "G-PC18TN83WD"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);</code></pre>
     </details>
 
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
   <script type="module">
+    // Firebase SDKs (ES modules via CDN)
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
     import { getAnalytics, isSupported } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-analytics.js";
     import {
-      getAuth, onAuthStateChanged, signOut,
-      createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile
+      getAuth, onAuthStateChanged, signOut, signInAnonymously, updateProfile
     } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
     import {
       getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc,
       collection, serverTimestamp, onSnapshot, query, where, orderBy, limit
     } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
-    // === Embedded Firebase Config ===
+    // === Initialize Firebase with your config ===
     const firebaseConfig = {
       apiKey: "AIzaSyD4vP74YleiqqpVyIZzCQLqcjWIkcrzlxo",
       authDomain: "mr-oza-helpdesk.firebaseapp.com",
@@ -327,8 +380,6 @@ admin.initializeApp({ credential: admin.credential.cert(sa) });
       appId: "1:340032460471:web:a0a87895948ca769199f32",
       measurementId: "G-PC18TN83WD"
     };
-    // =================================
-
     const app = initializeApp(firebaseConfig);
     try { isSupported().then(s => { if (s) getAnalytics(app); }); } catch {}
 
@@ -349,8 +400,8 @@ admin.initializeApp({ credential: admin.credential.cert(sa) });
 
     document.addEventListener('DOMContentLoaded', () => {
       M.Tabs.init(document.querySelectorAll('.tabs'));
-      M.FormSelect.init(document.querySelectorAll('select'));
       M.Tooltip.init(document.querySelectorAll('.tooltipped'));
+      M.Modal.init(document.querySelectorAll('.modal'));
       const hero = document.getElementById('heroCard');
       gsap.from('#title3d', {y: -20, opacity: 0, duration: 0.6, ease: 'power2.out'});
       hero.addEventListener('mousemove', (e) => {
@@ -366,124 +417,134 @@ admin.initializeApp({ credential: admin.credential.cert(sa) });
     });
 
     // UI refs
-    const roleLoginForm = $$('#roleLoginForm');
-    const signUpForm = $$('#signUpForm');
-    const ticketForm = $$('#ticketForm');
-    const settingsForm = $$('#settingsForm');
-    const btnSignOut = $$('#btnSignOut');
-    const appArea = $$('#appArea');
-    const ticketsList = $$('#ticketsList');
-    const studentsList = $$('#studentsList');
-    const historyList = $$('#historyList');
-    const cfgTitle = $$('#cfgTitle');
-    const cfgJoinCode = $$('#cfgJoinCode');
+    const studentCodeForm = $$('#studentCodeForm');
+    const adminCodeForm   = $$('#adminCodeForm');
+    const ticketForm      = $$('#ticketForm');
+    const settingsForm    = $$('#settingsForm');
+    const btnSignOut      = $$('#btnSignOut');
+    const appArea         = $$('#appArea');
+    const ticketsList     = $$('#ticketsList');
+    const studentsList    = $$('#studentsList');
+    const historyList     = $$('#historyList');
+    const cfgTitle        = $$('#cfgTitle');
+    const cfgStudentCode  = $$('#cfgStudentCode');
+    const cfgAdminCode    = $$('#cfgAdminCode');
+
+    // Edit modal refs
+    const editModalEl = document.getElementById('editModal');
+    const editModal   = () => M.Modal.getInstance(editModalEl);
+    const eTitle      = $$('#eTitle');
+    const eDetail     = $$('#eDetail');
+    const editSave    = $$('#editSave');
+    let editDocId     = null;
 
     let isAdmin = false;
     let profile = null;
+    const ticketsCache = new Map(); // id -> ticket data
 
+    // Auth state
     onAuthStateChanged(auth, async (user) => {
       if (!user) { appArea.classList.add('hide'); whoamiEl.textContent = '—'; roleEl.textContent = '—'; return; }
 
-      await user.getIdToken(true);
-      const token = await user.getIdTokenResult();
-      isAdmin = !!token.claims.admin;
+      whoamiEl.textContent = user.displayName || 'Guest';
+      roleEl.textContent = '—';
 
-      whoamiEl.textContent = user.displayName ? user.displayName : (user.email ? user.email.split('@')[0] : 'User');
-      roleEl.textContent = isAdmin ? 'Admin (Teacher)' : 'Student';
-
-      if (isAdmin) {
-        profile = null;
-      } else {
-        const pRef = doc(db, 'profiles', user.uid);
-        const snap = await getDoc(pRef);
-        if (snap.exists()) {
-          profile = snap.data();
-          if (profile.disabled) {
-            toast('Your account is disabled. Contact your teacher.');
-            await signOut(auth);
-            return;
-          }
-        } else {
-          toast('Complete sign-up with a valid Join Code first.');
-          await signOut(auth);
-          return;
+      const pRef = doc(db, 'profiles', user.uid);
+      const snap = await getDoc(pRef);
+      if (snap.exists()) {
+        profile = snap.data();
+        if (profile.disabled) {
+          toast('Your account is disabled. Contact the teacher.');
+          await signOut(auth); return;
         }
+        roleEl.textContent = profile.role === 'admin' ? 'Admin (Teacher)' : 'Student';
+      } else {
+        profile = null;
+        roleEl.textContent = '—';
       }
 
-      const cfgRef = doc(db, 'config', 'app');
-      const cfgSnap = await getDoc(cfgRef);
-      if (cfgSnap.exists()) {
-        const data = cfgSnap.data();
-        document.getElementById('title3d').textContent = data.title || 'AOIT Live Helpdesk';
-      }
+      // Admin-only read of config title
+      try {
+        const cfgSnap = await getDoc(doc(db, 'config', 'app'));
+        if (cfgSnap.exists()) {
+          const data = cfgSnap.data();
+          document.getElementById('title3d').textContent = data.title || 'AOIT Live Helpdesk';
+        }
+      } catch {}
 
       appArea.classList.remove('hide');
       bindTickets(user);
       bindHistory(user);
-      if (isAdmin) {
+      if (profile && profile.role === 'admin') {
+        isAdmin = true;
         bindStudents();
-        loadSettingsForm();
-        cfgTitle.disabled = false; cfgJoinCode.disabled = false;
+        try { await loadSettingsForm(); } catch {}
+        cfgTitle.disabled = false; cfgStudentCode.disabled = false; cfgAdminCode.disabled = false;
       } else {
+        isAdmin = false;
         studentsList.innerHTML = '<li class="collection-item">Students tab is for admins only.</li>';
-        cfgTitle.disabled = true; cfgJoinCode.disabled = true;
+        cfgTitle.disabled = true; cfgStudentCode.disabled = true; cfgAdminCode.disabled = true;
       }
     });
 
-    // Role-select login
-    roleLoginForm.addEventListener('submit', async (e) => {
+    // Join as Student via code
+    studentCodeForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const roleChoice = (document.getElementById('roleSelect')).value;
-      const email = (document.getElementById('email')).value.trim();
-      const pass  = (document.getElementById('password')).value;
+      const name = (document.getElementById('stName')).value.trim();
+      const code = (document.getElementById('stCode')).value.trim();
       try {
-        const { user } = await signInWithEmailAndPassword(auth, email, pass);
-        await user.getIdToken(true);
-        const token = await user.getIdTokenResult();
-        const claimAdmin = !!token.claims.admin;
-        if (roleChoice === 'teacher' && !claimAdmin) {
-          await signOut(auth);
-          toast('This account is not an admin. Ask Mr Oza to grant admin via the Node script.');
-          return;
+        let user = auth.currentUser;
+        if (!user) {
+          await signInAnonymously(auth);
+          user = auth.currentUser;
         }
-        if (roleChoice === 'student' && claimAdmin) {
-          toast('Admin account detected — continuing with admin features.');
-        } else {
-          toast('Signed in.');
-        }
-      } catch (err) { console.error(err); toast(err.message); }
-    });
+        try { await updateProfile(user, { displayName: name }); } catch {}
+        whoamiEl.textContent = name || user.uid.slice(0,6);
 
-    // Student Sign Up
-    signUpForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const name = (document.getElementById('upName')).value.trim();
-      const email = (document.getElementById('upEmail')).value.trim();
-      const pass  = (document.getElementById('upPassword')).value;
-      const code  = (document.getElementById('joinCode')).value.trim();
-      try {
-        const { user } = await createUserWithEmailAndPassword(auth, email, pass);
-        await updateProfile(user, { displayName: name });
         await setDoc(doc(db, 'profiles', user.uid), {
-          displayName: name,
+          displayName: name || 'Student',
           role: 'student',
-          classCode: code,
+          entryCode: code,
           disabled: false,
           createdAt: serverTimestamp(),
         });
-        toast('Account created. Sign in now.');
-        await signOut(auth);
+        toast('Joined as student.');
       } catch (err) { console.error(err); toast(err.message); }
     });
 
-    // Global Sign Out
+    // Join as Admin via code
+    adminCodeForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = (document.getElementById('adName')).value.trim();
+      const code = (document.getElementById('adCode')).value.trim();
+      try {
+        let user = auth.currentUser;
+        if (!user) {
+          await signInAnonymously(auth);
+          user = auth.currentUser;
+        }
+        try { await updateProfile(user, { displayName: name }); } catch {}
+        whoamiEl.textContent = name || user.uid.slice(0,6);
+
+        await setDoc(doc(db, 'profiles', user.uid), {
+          displayName: name || 'Admin',
+          role: 'admin',
+          entryCode: code,
+          disabled: false,
+          createdAt: serverTimestamp(),
+        });
+        toast('Joined as admin.');
+      } catch (err) { console.error(err); toast(err.message); }
+    });
+
+    // Sign out
     btnSignOut.addEventListener('click', async () => {
       await signOut(auth);
       toast('Signed out.');
       location.reload();
     });
 
-    // History logger
+    // History helper
     async function logHistory(entry) {
       try { await addDoc(collection(db, 'history'), { ...entry, ts: serverTimestamp() }); }
       catch (e) { console.warn('History log failed:', e?.message); }
@@ -494,15 +555,19 @@ admin.initializeApp({ credential: admin.credential.cert(sa) });
     function bindTickets(user) {
       if (unsubTickets) unsubTickets();
       const colRef = collection(db, 'tickets');
-      const qRef = isAdmin
+      const qRef = (profile && profile.role === 'admin')
         ? query(colRef, orderBy('createdAt', 'desc'))
         : query(colRef, where('ownerUid', '==', user.uid), orderBy('createdAt', 'desc'));
+
       unsubTickets = onSnapshot(qRef, (snap) => {
         ticketsList.innerHTML = '';
+        ticketsCache.clear();
         snap.forEach((docSnap) => {
           const t = docSnap.data();
+          ticketsCache.set(docSnap.id, t);
           const li = document.createElement('li');
           li.className = 'collection-item';
+          const canEdit = (profile && profile.role === 'admin') || (t.ownerUid === user.uid && (t.status !== 'resolved'));
           li.innerHTML = `
             <div>
               <div><strong>${safe(t.title)}</strong></div>
@@ -513,27 +578,20 @@ admin.initializeApp({ credential: admin.credential.cert(sa) });
               </div>
               <div class="grey-text">${safe(t.detail ?? '')}</div>
             </div>
-            <div>${renderTicketActions(docSnap.id, t)}</div>
+            <div>
+              ${canEdit ? `<a class="btn-flat action-chip" data-act="edit" data-id="${docSnap.id}" title="Edit"><i class="material-icons">edit</i></a>` : ''}
+              ${(profile && profile.role === 'admin') || (t.ownerUid === user.uid && t.status !== 'resolved')
+                ? `<a class="btn-flat red-text action-chip" data-act="delete" data-id="${docSnap.id}" title="Delete"><i class="material-icons">delete</i></a>`
+                : ''}
+              ${(profile && profile.role === 'admin')
+                ? ['open','in_progress','resolved'].map(st => `<span class="badge-status badge-${st.replace(' ','_')} action-chip" data-act="status" data-id="${docSnap.id}" data-status="${st}" data-cur="${t.status ?? 'open'}">${st}</span>`).join(' ')
+                : ''}
+            </div>
           `;
           ticketsList.appendChild(li);
           wireTicketButtons(docSnap.id, t);
         });
       });
-    }
-
-    function renderTicketActions(id, t) {
-      const actions = [];
-      if (isAdmin) {
-        ['open','in_progress','resolved'].forEach(st => {
-          actions.push(`<span class="badge-status badge-${st.replace(' ','_')} action-chip" data-act="status" data-id="${id}" data-status="${st}" data-cur="${t.status ?? 'open'}">${st}</span>`);
-        });
-        actions.push(`<a class="btn-flat red-text action-chip" data-act="delete" data-id="${id}" title="Delete"><i class="material-icons">delete</i></a>`);
-      } else {
-        if (t.status !== 'resolved') {
-          actions.push(`<a class="btn-flat red-text action-chip" data-act="delete" data-id="${id}" title="Delete"><i class="material-icons">delete</i></a>`);
-        }
-      }
-      return actions.join(' ');
     }
 
     function wireTicketButtons(id, t) {
@@ -551,7 +609,7 @@ admin.initializeApp({ credential: admin.credential.cert(sa) });
                 ownerUid: t.ownerUid,
                 ownerName: t.ownerName,
                 actorUid: user?.uid || null,
-                actorName: user?.displayName || (user?.email?.split('@')[0]) || 'User'
+                actorName: profile?.displayName || user?.displayName || (user?.uid?.slice(0,6)) || 'User'
               });
               await deleteDoc(doc(db, 'tickets', id));
               toast('Ticket removed.');
@@ -569,25 +627,63 @@ admin.initializeApp({ credential: admin.credential.cert(sa) });
                 fromStatus: from,
                 toStatus: to,
                 actorUid: user?.uid || null,
-                actorName: user?.displayName || (user?.email?.split('@')[0]) || 'User'
+                actorName: profile?.displayName || user?.displayName || (user?.uid?.slice(0,6)) || 'User'
               });
               toast('Status updated.');
+            } else if (act === 'edit') {
+              // open modal prefilled
+              editDocId = id;
+              const cur = ticketsCache.get(id) || t;
+              eTitle.value = cur.title || '';
+              eDetail.value = cur.detail || '';
+              M.updateTextFields();
+              editModal().open();
             }
           } catch (err) { console.error(err); toast(err.message); }
         });
       });
     }
 
+    // Save edit
+    editSave.addEventListener('click', async () => {
+      if (!editDocId) return;
+      const newTitle = eTitle.value.trim();
+      const newDetail = eDetail.value.trim();
+      if (!newTitle || !newDetail) return toast('Fill title and detail.');
+      try {
+        const prev = ticketsCache.get(editDocId) || {};
+        await updateDoc(doc(db, 'tickets', editDocId), {
+          title: newTitle,
+          detail: newDetail,
+          updatedAt: serverTimestamp()
+        });
+        const user = auth.currentUser;
+        await logHistory({
+          type: 'ticket_updated',
+          ticketId: editDocId,
+          title: newTitle,
+          ownerUid: prev.ownerUid,
+          ownerName: prev.ownerName,
+          actorUid: user?.uid || null,
+          actorName: profile?.displayName || user?.displayName || (user?.uid?.slice(0,6)) || 'User'
+        });
+        editModal().close();
+        toast('Ticket updated.');
+        editDocId = null;
+      } catch (err) { console.error(err); toast(err.message); }
+    });
+
+    // Submit new ticket
     ticketForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const user = auth.currentUser;
-      if (!user) return toast('Please sign in.');
+      if (!user) return toast('Enter with a code first.');
       const title = (document.getElementById('tTitle')).value.trim();
       const detail = (document.getElementById('tDetail')).value.trim();
       try {
         const docRef = await addDoc(collection(db, 'tickets'), {
           ownerUid: user.uid,
-          ownerName: user.displayName || (user.email?.split('@')[0]) || 'Student',
+          ownerName: (profile?.displayName) || user.displayName || (user.email?.split('@')[0]) || 'Student',
           title, detail,
           status: 'open',
           createdAt: serverTimestamp(),
@@ -598,9 +694,9 @@ admin.initializeApp({ credential: admin.credential.cert(sa) });
           ticketId: docRef.id,
           title,
           ownerUid: user.uid,
-          ownerName: user.displayName || (user.email?.split('@')[0]) || 'Student',
+          ownerName: (profile?.displayName) || user.displayName || (user.email?.split('@')[0]) || 'Student',
           actorUid: user.uid,
-          actorName: user.displayName || (user.email?.split('@')[0]) || 'Student'
+          actorName: (profile?.displayName) || user.displayName || (user.email?.split('@')[0]) || 'Student'
         });
         (document.getElementById('tTitle')).value = '';
         (document.getElementById('tDetail')).value = '';
@@ -663,7 +759,7 @@ admin.initializeApp({ credential: admin.credential.cert(sa) });
     function bindHistory(user) {
       if (unsubHistory) unsubHistory();
       const col = collection(db, 'history');
-      const qRef = isAdmin
+      const qRef = (profile && profile.role === 'admin')
         ? query(col, orderBy('ts', 'desc'), limit(200))
         : query(col, where('ownerUid', '==', user.uid), orderBy('ts', 'desc'), limit(200));
       unsubHistory = onSnapshot(qRef, (snap) => {
@@ -677,6 +773,8 @@ admin.initializeApp({ credential: admin.credential.cert(sa) });
             line = `<strong>${safe(h.actorName)}</strong> created ticket <em>${safe(h.title)}</em>`;
           } else if (h.type === 'status_change') {
             line = `<strong>${safe(h.actorName)}</strong> changed <em>${safe(h.title)}</em> from <b>${safe(h.fromStatus)}</b> to <b>${safe(h.toStatus)}</b>`;
+          } else if (h.type === 'ticket_updated') {
+            line = `<strong>${safe(h.actorName)}</strong> updated <em>${safe(h.title)}</em>`;
           } else if (h.type === 'ticket_deleted') {
             line = `<strong>${safe(h.actorName)}</strong> deleted ticket <em>${safe(h.title)}</em>`;
           } else {
@@ -693,21 +791,24 @@ admin.initializeApp({ credential: admin.credential.cert(sa) });
       });
     }
 
-    // Settings
+    // Settings (admin)
     async function loadSettingsForm() {
       const ref = doc(db, 'config', 'app');
       const snap = await getDoc(ref);
-      const data = snap.exists() ? snap.data() : { title: 'AOIT Live Helpdesk', classJoinCode: '' };
+      const data = snap.exists() ? snap.data() : { title: 'AOIT Live Helpdesk', studentAccessCode: '', adminAccessCode: '' };
       cfgTitle.value = data.title || '';
-      cfgJoinCode.value = data.classJoinCode || '';
+      cfgStudentCode.value = data.studentAccessCode || '';
+      cfgAdminCode.value = data.adminAccessCode || '';
       M.updateTextFields();
     }
     settingsForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (!(profile && profile.role === 'admin')) return;
       try {
         await setDoc(doc(db, 'config', 'app'), {
           title: cfgTitle.value.trim(),
-          classJoinCode: cfgJoinCode.value.trim()
+          studentAccessCode: cfgStudentCode.value.trim(),
+          adminAccessCode: cfgAdminCode.value.trim()
         }, { merge: true });
         document.getElementById('title3d').textContent = cfgTitle.value.trim() || 'AOIT Live Helpdesk';
         toast('Settings saved.');
@@ -715,11 +816,11 @@ admin.initializeApp({ credential: admin.credential.cert(sa) });
     });
   </script>
 
-  <!-- No Firebase Storage used in the app. -->
+  <!-- No Firebase Storage used. Anonymous Auth + Firestore Rules validate codes securely. -->
 </body>
 </html>
 """
-path = "/mnt/data/index-role-select-helpdesk-oza-credit.html"
+path = "/mnt/data/index-code-access-helpdesk-edit.html"
 with open(path, "w") as f:
     f.write(html)
 path
