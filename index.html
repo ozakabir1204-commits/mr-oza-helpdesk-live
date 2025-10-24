@@ -1,5 +1,4 @@
-# Rebuild a clean single-file index.html with code-based access, student edits, admin controls, and credit.
-html = r"""<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -12,9 +11,10 @@ html = r"""<!DOCTYPE html>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <style>
     * { box-sizing: border-box; }
-    body { font-family: Roboto, system-ui, -apple-system, Segoe UI, Arial, sans-serif; }
+    html, body { height: 100%; }
+    body { font-family: Roboto, system-ui, -apple-system, Segoe UI, Arial, sans-serif; background:#fafafa; }
     .brand-logo { font-weight: 800; letter-spacing: .5px; }
-    #heroCard { transition: transform .2s ease-out; }
+    #heroCard { transition: transform .2s ease-out; will-change: transform; backface-visibility:hidden; }
     .small { font-size: .9rem; }
     .pill { border-radius: 999px; padding: .25rem .6rem; background: #e0f2f1; }
     #ticketsList .collection-item, #historyList .collection-item {
@@ -32,14 +32,25 @@ html = r"""<!DOCTYPE html>
     .mt-8 { margin-top: 2rem; }
     .subtle { color: #607d8b; }
     .credit { font-weight: 800; letter-spacing: .5px; }
+    /* NEW: tighter, consistent spacing + equal height cards */
+    .container { max-width: 1080px; }
+    .grid-two { display: grid; grid-template-columns: 1fr; gap: 20px; }
+    @media (min-width: 992px) {
+      .grid-two { grid-template-columns: 1fr 1fr; }
+    }
+    .grid-two .card { height: 100%; margin: 0; }
+    .card .card-content { padding: 22px 24px 16px; }
+    .input-field { margin-bottom: 1.1rem; }
+    .card-title { margin-bottom: .75rem; }
+    nav { position: sticky; top: 0; z-index: 1000; }
   </style>
 </head>
-<body class="grey lighten-4">
+<body>
   <nav class="z-depth-1">
     <div class="nav-wrapper teal">
       <a href="#!" class="brand-logo center" id="title3d">AOIT Live Helpdesk</a>
       <ul class="right">
-        <li><span class="hide-on-small-only credit" style="margin-right:1rem;">This website developed by MR.OZA</span></li>
+        <li><span class="hide-on-med-and-down credit" style="margin-right:1rem;">This website developed by MR.OZA</span></li>
         <li><a href="#!" id="btnSignOut" class="tooltipped" data-position="left" data-tooltip="Sign out">
           <i class="material-icons">logout</i></a></li>
       </ul>
@@ -47,7 +58,7 @@ html = r"""<!DOCTYPE html>
   </nav>
 
   <div class="container">
-    <div class="section">
+    <div class="section" style="padding-top:18px;">
       <div class="card hoverable" id="heroCard">
         <div class="card-content">
           <span class="card-title">
@@ -66,9 +77,9 @@ html = r"""<!DOCTYPE html>
     </div>
 
     <!-- CODE ACCESS -->
-    <div class="row">
-      <!-- STUDENT ACCESS -->
-      <div class="col s12 m6">
+    <div class="section" style="padding-top:0;">
+      <div class="grid-two">
+        <!-- STUDENT ACCESS -->
         <div class="card">
           <div class="card-content">
             <span class="card-title">Enter as Student (Code)</span>
@@ -90,10 +101,8 @@ html = r"""<!DOCTYPE html>
             </p>
           </div>
         </div>
-      </div>
 
-      <!-- TEACHER / ADMIN ACCESS -->
-      <div class="col s12 m6">
+        <!-- TEACHER / ADMIN ACCESS -->
         <div class="card">
           <div class="card-content">
             <span class="card-title">Enter as Teacher / Admin (Code)</span>
@@ -128,7 +137,7 @@ html = r"""<!DOCTYPE html>
       </ul>
 
       <div id="tabTickets" class="col s12">
-        <div class="section">
+        <div class="section" style="padding-top:12px;">
           <div class="card">
             <div class="card-content">
               <span class="card-title">New Ticket</span>
@@ -228,126 +237,6 @@ html = r"""<!DOCTYPE html>
         <a href="#!" id="editSave" class="btn teal">Save changes</a>
       </div>
     </div>
-
-    <!-- Firestore Rules (code-verified roles; NO Storage) -->
-    <details class="mt-8">
-      <summary><b>Firestore Security Rules (copy/paste)</b></summary>
-      <pre><code>rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-
-    function isSignedIn() { return request.auth != null; }
-
-    function hasProfile(uid) {
-      return exists(/databases/$(database)/documents/profiles/$(uid));
-    }
-
-    function userProfile(uid) {
-      return get(/databases/$(database)/documents/profiles/$(uid)).data;
-    }
-
-    function isAdmin() {
-      return isSignedIn()
-             && hasProfile(request.auth.uid)
-             && userProfile(request.auth.uid).role == "admin"
-             && userProfile(request.auth.uid).disabled != true;
-    }
-
-    function isStudent() {
-      return isSignedIn()
-             && hasProfile(request.auth.uid)
-             && userProfile(request.auth.uid).role == "student"
-             && userProfile(request.auth.uid).disabled != true;
-    }
-
-    function studentCode() {
-      return get(/databases/$(database)/documents/config/app).data.studentAccessCode;
-    }
-    function adminCode() {
-      return get(/databases/$(database)/documents/config/app).data.adminAccessCode;
-    }
-
-    match /profiles/{uid} {
-      allow read: if isAdmin() || (isSignedIn() && request.auth.uid == uid);
-
-      allow create: if isSignedIn()
-                    && request.auth.uid == uid
-                    && (
-                      (request.resource.data.role == "student" && request.resource.data.entryCode == studentCode())
-                      || (request.resource.data.role == "admin" && request.resource.data.entryCode == adminCode())
-                    )
-                    && request.resource.data.disabled == false;
-
-      allow update: if isAdmin()
-        || (isSignedIn() && request.auth.uid == uid
-            && request.resource.data.displayName is string
-            && request.resource.data.role == resource.data.role
-            && request.resource.data.entryCode == resource.data.entryCode
-            && request.resource.data.disabled == resource.data.disabled
-            && request.resource.data.createdAt == resource.data.createdAt);
-      allow delete: if isAdmin();
-    }
-
-    match /tickets/{id} {
-      allow read: if isSignedIn() && (isAdmin() || resource.data.ownerUid == request.auth.uid);
-
-      allow create: if isSignedIn() && (isAdmin() || isStudent());
-
-      allow update: if isSignedIn() && (
-        isAdmin()
-        || (request.auth.uid == resource.data.ownerUid && resource.data.status != "resolved")
-      );
-
-      allow delete: if isSignedIn() && (
-        isAdmin()
-        || (request.auth.uid == resource.data.ownerUid && resource.data.status != "resolved")
-      );
-    }
-
-    match /history/{hid} {
-      allow read: if isSignedIn() && (
-        isAdmin()
-        || (resource.data.ownerUid == request.auth.uid)
-        || (resource.data.actorUid == request.auth.uid)
-      );
-      allow create: if isSignedIn() && (isAdmin() || isStudent());
-      allow update, delete: if false;
-    }
-
-    match /config/{doc} {
-      allow read: if isAdmin(); // Codes hidden from non-admins
-      allow write: if isAdmin();
-    }
-  }
-}</code></pre>
-    </details>
-
-    <!-- Provided Firebase config (your snippet) -->
-    <details class="mt-8">
-      <summary><b>Embedded Firebase config (from you)</b></summary>
-      <pre><code>// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyD4vP74YleiqqpVyIZzCQLqcjWIkcrzlxo",
-  authDomain: "mr-oza-helpdesk.firebaseapp.com",
-  projectId: "mr-oza-helpdesk",
-  storageBucket: "mr-oza-helpdesk.firebasestorage.app",
-  messagingSenderId: "340032460471",
-  appId: "1:340032460471:web:a0a87895948ca769199f32",
-  measurementId: "G-PC18TN83WD"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);</code></pre>
-    </details>
-
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
@@ -395,6 +284,7 @@ const analytics = getAnalytics(app);</code></pre>
       M.Tabs.init(document.querySelectorAll('.tabs'));
       M.Tooltip.init(document.querySelectorAll('.tooltipped'));
       M.Modal.init(document.querySelectorAll('.modal'));
+      M.updateTextFields(); // ensure labels are placed correctly
       const hero = document.getElementById('heroCard');
       gsap.from('#title3d', {y: -20, opacity: 0, duration: 0.6, ease: 'power2.out'});
       hero.addEventListener('mousemove', (e) => {
@@ -634,7 +524,7 @@ const analytics = getAnalytics(app);</code></pre>
     }
 
     // Save edit
-    editSave.addEventListener('click', async () => {
+    document.getElementById('editSave').addEventListener('click', async () => {
       if (!editDocId) return;
       const newTitle = eTitle.value.trim();
       const newDetail = eDetail.value.trim();
@@ -804,11 +694,5 @@ const analytics = getAnalytics(app);</code></pre>
       } catch (err) { console.error(err); toast(err.message); }
     });
   </script>
-
-  <!-- No Firebase Storage used. Anonymous Auth + Firestore Rules validate codes securely. -->
 </body>
 </html>
-"""
-with open("/mnt/data/index.html", "w") as f:
-    f.write(html)
-print("/mnt/data/index.html")
