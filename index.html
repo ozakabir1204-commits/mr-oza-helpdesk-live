@@ -1,607 +1,725 @@
-<!DOCTYPE html>
+# Create updated single-file HTML with a visible credit: "This website developed by MR.OZA"
+html = r"""<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MR Oza • Live Help‑Desk (AOIT & CS Classes)</title>
-  <meta name="description" content="Real‑time Live Help‑Desk for AOIT & Computer Science classes. Chat history, tickets (add/update/close), and admin tools for MR Oza. Built with Firebase + Material UI." />
-
-  <!-- Roboto + Material Symbols -->
+  <title>AOIT Live Helpdesk — Mr Oza</title>
+  <meta name="description" content="Live Helpdesk with Material Design UI, 3D animation, realtime tickets, history, and role-select login (Teacher/Student). Admin controls for Mr Oza. This website developed by MR.OZA." />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
-
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <style>
-    :root {
-      --bg: #0b1020;
-      --card: #121a2f;
-      --card-2: #0f1630;
-      --text: #e9eefc;
-      --muted: #b8c2e6;
-      --primary: #4f8cff; /* material-ish blue */
-      --accent: #30d0a0;  /* teal */
-      --warning: #ffb020;
-      --danger: #ff5d5d;
-      --success: #2cc071;
-      --chip: #1a2442;
-      --ripple: rgba(255,255,255,0.25);
-    }
     * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body {
-      margin: 0; font-family: Roboto, system-ui, -apple-system, Segoe UI, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-      color: var(--text); background: radial-gradient(1200px 600px at 10% -10%, #233058 0, rgba(0,0,0,0) 60%),
-                             radial-gradient(1200px 600px at 100% 0%, #1d2446 0, rgba(0,0,0,0) 60%),
-                             linear-gradient(180deg, #0a0f1f, #0b1020 40%);
-      overflow: hidden;
+    body { font-family: Roboto, system-ui, -apple-system, Segoe UI, Arial, sans-serif; }
+    .brand-logo { font-weight: 800; letter-spacing: .5px; }
+    #heroCard { transition: transform .2s ease-out; }
+    .small { font-size: .9rem; }
+    .pill { border-radius: 999px; padding: .25rem .6rem; background: #e0f2f1; }
+    #ticketsList .collection-item, #historyList .collection-item {
+      display: flex; align-items: center; justify-content: space-between; gap: .75rem;
     }
-
-    /* Top app bar */
-    .appbar {
-      display:flex; align-items:center; gap:.75rem; padding:.75rem 1rem; position:sticky; top:0; z-index:10;
-      background: linear-gradient(90deg, rgba(15,22,48,.8), rgba(18,26,47,.8));
-      backdrop-filter: blur(6px);
-      border-bottom: 1px solid rgba(255,255,255,.06);
-    }
-    .logo {
-      width:40px; height:40px; display:grid; place-items:center; border-radius:12px; background:linear-gradient(135deg, #4f8cff, #30d0a0);
-      box-shadow: 0 6px 24px rgba(79,140,255,.4);
-      font-weight:900; letter-spacing:.5px;
-    }
-    .title {
-      font-size:clamp(16px, 2.2vw, 22px); font-weight:800; letter-spacing:.3px; line-height:1.1;
-    }
-    .subtitle {
-      font-size:12px; color: var(--muted);
-    }
-    .spacer { flex: 1; }
-    .btn {
-      appearance:none; border:0; outline:0; cursor:pointer; border-radius:14px;
-      padding:.6rem .9rem; font-weight:600; color:#0b1020; background: var(--text);
-      transition: transform .05s ease-in-out, filter .2s ease;
-      position:relative; overflow:hidden;
-    }
-    .btn:hover { filter: brightness(1.05); }
-    .btn:active { transform: translateY(1px) scale(.98); }
-    .btn.primary { background: linear-gradient(135deg, #4f8cff, #5eb1f7); color:white; }
-    .btn.ghost { background: transparent; color: var(--text); border:1px solid rgba(255,255,255,.15); }
-    .icon { font-family: 'Material Symbols Rounded'; font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-
-    /* Layout */
-    .shell { display:grid; grid-template-rows: auto 1fr; height: 100%; }
-    .main { display:grid; grid-template-columns: 300px 1fr; gap: 14px; padding: 14px; height: calc(100vh - 72px); }
-    @media (max-width: 900px){ .main { grid-template-columns: 1fr; height: auto; overflow:auto; } }
-
-    .card { background: linear-gradient(180deg, var(--card), var(--card-2)); border: 1px solid rgba(255,255,255,.06); border-radius: 22px;
-            box-shadow: 0 10px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04); }
-
-    /* Left panel: welcome + auth + tabs */
-    .left { padding: 16px; display:flex; flex-direction:column; gap:16px; }
-    .hero {
-      position:relative; overflow:hidden; padding:16px; border-radius:18px; background: linear-gradient(135deg, rgba(79,140,255,.2), rgba(48,208,160,.15));
-      border: 1px solid rgba(255,255,255,.08);
-    }
-    .hero h1 { margin:0; font-size: clamp(18px, 2.6vw, 22px); }
-    .ticker { color: var(--muted); font-size: 12px; margin-top: 6px; white-space: nowrap; overflow: hidden; }
-    .ticker span { display:inline-block; padding-right: 40px; animation: marquee 16s linear infinite; }
-    @keyframes marquee { from { transform:translateX(0); } to { transform:translateX(-100%); } }
-
-    .auth { display:flex; flex-direction:column; gap:10px; }
-    .field { display:flex; flex-direction:column; gap:6px; }
-    .field input, .field select, .field textarea {
-      background: rgba(255,255,255,.04); color: var(--text); border:1px solid rgba(255,255,255,.12);
-      border-radius: 12px; padding: 10px 12px; outline: none; font: inherit; transition: border .2s;
-    }
-    .field input:focus, .field textarea:focus { border-color: var(--primary); }
-
-    .tabs { display:flex; gap:8px; }
-    .tab { flex:1; text-align:center; padding:10px 12px; border-radius:12px; cursor:pointer; user-select:none; border:1px solid rgba(255,255,255,.1); color: var(--muted); }
-    .tab.active { color:white; border-color: transparent; background: rgba(79,140,255,.12); }
-
-    /* Right: content views */
-    .content { position:relative; overflow:hidden; }
-    .view { position:absolute; inset:0; display:none; }
-    .view.active { display:grid; grid-template-rows: 1fr auto; }
-
-    /* Chat view */
-    .chat-stream { overflow:auto; padding: 18px; display:flex; flex-direction:column; gap:12px; }
-    .bubble { max-width: 72ch; padding: 10px 12px; border-radius: 14px; border:1px solid rgba(255,255,255,.08); background: #0e1731; }
-    .bubble.me { background: #18224a; border-color: rgba(79,140,255,.4); }
-    .bubble.admin { background: #0d2a1f; border-color: rgba(48,208,160,.5); }
-    .meta { font-size:11px; color: var(--muted); margin-bottom: 4px; display:flex; gap:6px; align-items:center; }
-    .msg { font-size:14px; white-space: pre-wrap; }
-    .row { display:flex; gap:8px; padding: 12px; border-top: 1px solid rgba(255,255,255,.08); }
-    .row input { flex:1; }
-
-    /* Tickets view */
-    .tickets { overflow:auto; padding: 18px; display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:14px; }
-    .ticket { padding: 12px; border-radius: 14px; border:1px solid rgba(255,255,255,.08); background:#0f1838; display:flex; flex-direction:column; gap:8px; }
-    .chip { display:inline-flex; align-items:center; gap:6px; background: var(--chip); color: #c9d5ff; border:1px solid rgba(255,255,255,.08); border-radius:999px; padding:4px 10px; font-size:12px; }
-    .status-Open { color:white; background: rgba(79,140,255,.2); }
-    .status-In\ Progress { color:white; background: rgba(255,176,32,.22); }
-    .status-Closed { color:white; background: rgba(44,192,113,.24); }
-
-    .ticket-actions { display:flex; gap:8px; flex-wrap:wrap; }
-
-    /* Admin view */
-    .admin-panel { padding: 18px; display:flex; flex-direction:column; gap:12px; }
-    .danger { background: linear-gradient(135deg, #ff5d5d, #ff9f6a); color:white; }
-    .warn { background: linear-gradient(135deg, #ffb020, #ffd25b); color:#1a1300; }
-    .okay { background: linear-gradient(135deg, #2cc071, #8ad6b1); color:#00170b; }
-
-    /* Toast */
-    .toast { position:fixed; bottom:16px; left:50%; transform:translateX(-50%) translateY(120%);
-      background: rgba(20,28,56,.96); color: var(--text); border:1px solid rgba(255,255,255,.08);
-      padding: 10px 14px; border-radius: 12px; transition: transform .25s ease; z-index: 50; }
-    .toast.show { transform:translateX(-50%) translateY(0%); }
-
-    /* Simple focus ring for a11y */
-    :focus-visible { outline: 2px solid #5eb1f7; outline-offset: 2px; border-radius: 10px; }
+    .ticket-meta { font-size: .82rem; color: #666; }
+    .badge-status { border-radius: 999px; padding: .25rem .5rem; font-size: .75rem; }
+    .badge-open { background: #e3f2fd; }
+    .badge-in_progress { background: #fff3e0; }
+    .badge-resolved { background: #e8f5e9; }
+    .action-chip { cursor: pointer; user-select: none; }
+    .hide { display: none !important; }
+    .footer-note { margin-top: 1rem; }
+    .grey-outline { border: 1px dashed #ddd; padding: .75rem; border-radius: .5rem; }
+    .mt-8 { margin-top: 2rem; }
+    .subtle { color: #607d8b; }
+    .credit { font-weight: 800; letter-spacing: .5px; }
   </style>
 </head>
-<body>
-  <div class="shell">
-    <header class="appbar">
-      <div class="logo" aria-hidden="true">AO</div>
-      <div>
-        <div class="title">Welcome to <strong>Live Help‑Desk</strong> — Created by <strong>MR OZA</strong></div>
-        <div class="subtitle">Welcome to AOIT & All Computer Science Class • Real‑time help, history you can review, and ticket tracking.</div>
+<body class="grey lighten-4">
+  <nav class="z-depth-1">
+    <div class="nav-wrapper teal">
+      <a href="#!" class="brand-logo center" id="title3d">AOIT Live Helpdesk</a>
+      <ul class="right">
+        <li><span class="hide-on-small-only credit" style="margin-right:1rem;">This website developed by MR.OZA</span></li>
+        <li><a href="#!" id="btnSignOut" class="tooltipped" data-position="left" data-tooltip="Sign out">
+          <i class="material-icons">logout</i></a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="section">
+      <div class="card hoverable" id="heroCard">
+        <div class="card-content">
+          <span class="card-title">
+            Welcome to <b>AOIT & Computer Science</b> Helpdesk — <b>Mr Oza</b>
+          </span>
+          <p class="grey-text">
+            Realtime tickets. Clean Material UI. Admin controls for teachers.
+          </p>
+          <div class="mt-8 subtle">
+            <span class="pill"><i class="material-icons tiny">person</i> Signed in as: <b id="whoami">—</b></span>
+            <span class="pill" style="margin-left:.5rem;"><i class="material-icons tiny">verified_user</i> Role: <b id="role">—</b></span>
+          </div>
+          <div class="mt-8 credit">This website developed by MR.OZA</div>
+        </div>
       </div>
-      <div class="spacer"></div>
-      <button id="btnSignOut" class="btn ghost" hidden><span class="icon">logout</span> Sign out</button>
-    </header>
+    </div>
 
-    <main class="main">
-      <!-- LEFT PANEL -->
-      <section class="card left">
-        <div class="hero">
-          <h1>Hi, <span id="who">Guest</span> 👋</h1>
-          <div class="ticker"><span>Welcome to Live Help‑Desk • Welcome to AOIT & All Computer Science Class • Built with Firebase • Chat history is preserved • Be professional and respectful •</span></div>
-        </div>
-
-        <div class="auth">
-          <div class="field">
-            <label for="displayName">Your display name</label>
-            <input id="displayName" placeholder="e.g., Alex (AOIT)" autocomplete="name" />
-          </div>
-
-          <div class="field">
-            <label for="rolePick">Role</label>
-            <select id="rolePick">
-              <option value="student">Student / Guest (anonymous)</option>
-              <option value="admin">Admin (email login)</option>
-            </select>
-          </div>
-
-          <div id="adminFields" class="field" hidden>
-            <label for="adminEmail">Admin email</label>
-            <input id="adminEmail" type="email" placeholder="admin@example.com" autocomplete="email" />
-            <label for="adminPass" style="margin-top:6px">Admin password</label>
-            <input id="adminPass" type="password" placeholder="••••••••" autocomplete="current-password" />
-            <small style="color:var(--muted)">Tip: create an Admin user in Firebase Authentication → Email/Password. Do <strong>not</strong> publish the password.</small>
-          </div>
-
-          <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            <button id="btnSignIn" class="btn primary"><span class="icon">login</span> Sign in</button>
-            <button id="btnUseSaved" class="btn" title="Use last name from this browser">Use saved name</button>
+    <!-- Role-select Login + Student Sign Up -->
+    <div class="row">
+      <div class="col s12 m6">
+        <div class="card">
+          <div class="card-content">
+            <span class="card-title">Login</span>
+            <form id="roleLoginForm" autocomplete="on">
+              <div class="input-field">
+                <select id="roleSelect" required>
+                  <option value="student" selected>Student</option>
+                  <option value="teacher">Teacher</option>
+                </select>
+                <label for="roleSelect">I am</label>
+              </div>
+              <div class="input-field">
+                <input id="email" type="email" required>
+                <label for="email">Email</label>
+              </div>
+              <div class="input-field">
+                <input id="password" type="password" required>
+                <label for="password">Password</label>
+              </div>
+              <button class="btn waves-effect waves-light teal" type="submit">
+                Sign In <i class="material-icons right">login</i>
+              </button>
+            </form>
+            <p class="grey-text small mt-8">
+              Choose <b>Teacher</b> if you’re Mr Oza or another instructor. Teacher accounts must be granted <code>admin: true</code> via a one-time Node script.
+            </p>
           </div>
         </div>
+      </div>
 
-        <div class="tabs" style="margin-top:8px;">
-          <div class="tab active" data-view="chatView"><span class="icon">forum</span>&nbsp;Chat</div>
-          <div class="tab" data-view="ticketsView"><span class="icon">confirmation_number</span>&nbsp;Tickets</div>
-          <div id="tabAdmin" class="tab" data-view="adminView" hidden><span class="icon">admin_panel_settings</span>&nbsp;Admin</div>
-        </div>
-
-        <div style="margin-top:8px; font-size:12px; color:var(--muted)">
-          • Keep messages school‑appropriate. • Do not share private information. • Tickets help track bigger issues.
-        </div>
-      </section>
-
-      <!-- RIGHT PANEL: VIEWS -->
-      <section class="card content">
-        <!-- CHAT -->
-        <div id="chatView" class="view active" role="region" aria-label="Chat">
-          <div id="chatStream" class="chat-stream"></div>
-          <div class="row">
-            <input id="chatInput" maxlength="500" placeholder="Type your message…"/>
-            <button id="btnSend" class="btn primary"><span class="icon">send</span></button>
+      <div class="col s12 m6">
+        <div class="card">
+          <div class="card-content">
+            <span class="card-title">Student Sign Up</span>
+            <form id="signUpForm" autocomplete="on">
+              <div class="input-field">
+                <input id="upName" type="text" required>
+                <label for="upName">Full Name</label>
+              </div>
+              <div class="input-field">
+                <input id="upEmail" type="email" required>
+                <label for="upEmail">Email</label>
+              </div>
+              <div class="input-field">
+                <input id="upPassword" type="password" minlength="6" required>
+                <label for="upPassword">Password (6+ chars)</label>
+              </div>
+              <div class="input-field">
+                <input id="joinCode" type="text" required>
+                <label for="joinCode">Class Join Code</label>
+              </div>
+              <button class="btn waves-effect waves-light teal" type="submit">
+                Create Account <i class="material-icons right">person_add</i>
+              </button>
+            </form>
+            <p class="grey-text small grey-outline mt-8">
+              Students: get the join code from <b>Mr Oza</b>. It’s required to create your account.
+            </p>
           </div>
         </div>
+      </div>
+    </div>
 
-        <!-- TICKETS -->
-        <div id="ticketsView" class="view" role="region" aria-label="Tickets">
-          <div class="tickets" id="ticketList"></div>
-          <div class="row" style="align-items:flex-start; flex-wrap:wrap; gap:8px;">
-            <input id="tTitle" maxlength="80" placeholder="New ticket title" />
-            <input id="tDesc" maxlength="200" placeholder="Short description" />
-            <button id="btnAddTicket" class="btn okay"><span class="icon">add</span> Add Ticket</button>
-          </div>
-        </div>
+    <!-- App content -->
+    <div id="appArea" class="hide">
+      <ul id="tabs" class="tabs">
+        <li class="tab col s3"><a class="active" href="#tabTickets">Tickets</a></li>
+        <li class="tab col s3"><a href="#tabStudents">Students</a></li>
+        <li class="tab col s3"><a href="#tabHistory">History</a></li>
+        <li class="tab col s3"><a href="#tabSettings">Settings</a></li>
+      </ul>
 
-        <!-- ADMIN -->
-        <div id="adminView" class="view" role="region" aria-label="Admin">
-          <div class="admin-panel">
-            <div style="font-weight:700">Admin tools (visible only to MR Oza)</div>
-            <div style="display:flex; gap:8px; flex-wrap:wrap;">
-              <button id="btnDeleteAllChat" class="btn danger"><span class="icon">delete_forever</span> Delete ALL chat</button>
-              <button id="btnDeleteAllTickets" class="btn warn"><span class="icon">delete_sweep</span> Delete ALL tickets</button>
-              <button id="btnExport" class="btn ghost"><span class="icon">download</span> Export data (JSON)</button>
+      <div id="tabTickets" class="col s12">
+        <div class="section">
+          <div class="card">
+            <div class="card-content">
+              <span class="card-title">New Ticket</span>
+              <form id="ticketForm">
+                <div class="input-field">
+                  <input id="tTitle" type="text" required>
+                  <label for="tTitle">Title</label>
+                </div>
+                <div class="input-field">
+                  <textarea id="tDetail" class="materialize-textarea" required></textarea>
+                  <label for="tDetail">Detail</label>
+                </div>
+                <button class="btn waves-effect waves-light teal" type="submit">
+                  Submit <i class="material-icons right">send</i>
+                </button>
+              </form>
             </div>
-            <small style="color:var(--muted)">Note: These actions affect the database. Use carefully. Students cannot access these tools.</small>
           </div>
         </div>
-      </section>
-    </main>
+        <div class="section">
+          <ul class="collection" id="ticketsList"></ul>
+        </div>
+      </div>
+
+      <div id="tabStudents" class="col s12">
+        <div class="section">
+          <div class="card">
+            <div class="card-content">
+              <span class="card-title">Students</span>
+              <p class="grey-text">Admins can disable/enable or remove student profiles.</p>
+              <ul class="collection" id="studentsList"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tabHistory" class="col s12">
+        <div class="section">
+          <div class="card">
+            <div class="card-content">
+              <span class="card-title">Recent Activity</span>
+              <p class="grey-text">Live log of ticket events with timestamps.</p>
+              <ul class="collection" id="historyList"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tabSettings" class="col s12">
+        <div class="section">
+          <div class="card">
+            <div class="card-content">
+              <span class="card-title">Class Settings</span>
+              <form id="settingsForm">
+                <div class="input-field">
+                  <input id="cfgTitle" type="text" required>
+                  <label for="cfgTitle">Header Title</label>
+                </div>
+                <div class="input-field">
+                  <input id="cfgJoinCode" type="text" required>
+                  <label for="cfgJoinCode">Class Join Code</label>
+                </div>
+                <button class="btn waves-effect waves-light teal" type="submit">
+                  Save Settings <i class="material-icons right">save</i>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section center grey-text footer-note">
+        <small class="credit">This website developed by MR.OZA</small><br/>
+        <small>Welcome to AOIT and all Computer Science classes • Created by <b>Mr Oza</b></small>
+      </div>
+    </div>
+
+    <details class="mt-8">
+      <summary><b>Firestore Security Rules (copy/paste)</b></summary>
+      <pre><code>rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() { return request.auth != null; }
+    function isAdmin()    { return isSignedIn() && request.auth.token.admin == true; }
+    function classJoinCode() {
+      return get(/databases/$(database)/documents/config/app).data.classJoinCode;
+    }
+
+    match /profiles/{uid} {
+      allow read: if isAdmin() || (isSignedIn() && request.auth.uid == uid);
+      allow create: if isSignedIn()
+                    && request.auth.uid == uid
+                    && request.resource.data.role == "student"
+                    && request.resource.data.classCode == classJoinCode()
+                    && !("admin" in request.resource.data);
+      allow update: if isAdmin()
+        || (isSignedIn() && request.auth.uid == uid
+            && request.resource.data.displayName is string
+            && request.resource.data.role == resource.data.role
+            && request.resource.data.classCode == resource.data.classCode
+            && request.resource.data.disabled == resource.data.disabled
+            && request.resource.data.createdAt == resource.data.createdAt);
+      allow delete: if isAdmin();
+    }
+
+    match /tickets/{id} {
+      allow read: if isSignedIn() && (isAdmin() || resource.data.ownerUid == request.auth.uid);
+      allow create: if isSignedIn() && (
+        isAdmin()
+        || (exists(/databases/$(database)/documents/profiles/$(request.auth.uid))
+            && get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.disabled != true)
+      );
+      allow update: if isSignedIn() && (
+        isAdmin()
+        || (request.auth.uid == resource.data.ownerUid && resource.data.status != "resolved")
+      );
+      allow delete: if isSignedIn() && (
+        isAdmin()
+        || (request.auth.uid == resource.data.ownerUid && resource.data.status != "resolved")
+      );
+    }
+
+    match /history/{hid} {
+      allow read: if isSignedIn() && (
+        isAdmin()
+        || (resource.data.ownerUid == request.auth.uid)
+        || (resource.data.actorUid == request.auth.uid)
+      );
+      allow create: if isSignedIn() && (
+        isAdmin()
+        || (request.resource.data.actorUid == request.auth.uid)
+      );
+      allow update, delete: if false;
+    }
+
+    match /config/{doc} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+  }
+}</code></pre>
+    </details>
+
+    <details class="mt-8">
+      <summary><b>Admin claim script (run once locally)</b></summary>
+      <pre><code>// setAdminClaim.js (Node)
+const admin = require('firebase-admin');
+const sa = require('./serviceAccountKey.json');
+admin.initializeApp({ credential: admin.credential.cert(sa) });
+(async () => {
+  const email = process.argv[2];
+  if (!email) { console.error('Usage: node setAdminClaim.js "teacher@example.com"'); process.exit(1); }
+  const user = await admin.auth().getUserByEmail(email);
+  await admin.auth().setCustomUserClaims(user.uid, { admin: true });
+  console.log('Admin set for', email, 'UID:', user.uid, '\\nSign out/in to refresh token.');
+})();</code></pre>
+    </details>
+
   </div>
 
-  <div id="toast" class="toast" role="status" aria-live="polite">Saved.</div>
-
-  <!-- Firebase (modular v11) via ESM CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
   <script type="module">
-    /* =======================
-       Firebase bootstrapping
-       ======================= */
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js';
-    import { getAnalytics, isSupported as analyticsSupported } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-analytics.js';
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+    import { getAnalytics, isSupported } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-analytics.js";
     import {
-      getAuth, onAuthStateChanged, signInAnonymously,
-      signInWithEmailAndPassword, signOut, updateProfile
-    } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
+      getAuth, onAuthStateChanged, signOut,
+      createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile
+    } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
     import {
-      getFirestore, collection, addDoc, serverTimestamp, query, orderBy,
-      onSnapshot, doc, deleteDoc, updateDoc, getDocs, writeBatch, limit,
-      where
-    } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js';
+      getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc,
+      collection, serverTimestamp, onSnapshot, query, where, orderBy, limit
+    } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
-    // Your Firebase configuration (provided by you)
+    // === Embedded Firebase Config ===
     const firebaseConfig = {
       apiKey: "AIzaSyD4vP74YleiqqpVyIZzCQLqcjWIkcrzlxo",
       authDomain: "mr-oza-helpdesk.firebaseapp.com",
       projectId: "mr-oza-helpdesk",
-      storageBucket: "mr-oza-helpdesk.firebasestorage.app", // not used (no Storage)
+      storageBucket: "mr-oza-helpdesk.firebasestorage.app",
       messagingSenderId: "340032460471",
       appId: "1:340032460471:web:a0a87895948ca769199f32",
       measurementId: "G-PC18TN83WD"
     };
+    // =================================
 
     const app = initializeApp(firebaseConfig);
-    // Analytics is optional; only start if supported to avoid console warnings.
-    try { if (await analyticsSupported()) getAnalytics(app); } catch (e) {}
+    try { isSupported().then(s => { if (s) getAnalytics(app); }); } catch {}
 
     const auth = getAuth(app);
-    const db   = getFirestore(app);
+    const db = getFirestore(app);
 
-    /* =======================
-       Basic UI helpers
-       ======================= */
-    const $ = (sel) => document.querySelector(sel);
-    const $$ = (sel) => Array.from(document.querySelectorAll(sel));
-    const toastEl = $('#toast');
-    const toast = (msg) => { toastEl.textContent = msg; toastEl.classList.add('show'); setTimeout(()=>toastEl.classList.remove('show'), 1600); };
+    const $$ = (sel) => document.querySelector(sel);
+    const toast = (msg) => M.toast({ html: msg, displayLength: 2200 });
+    const whoamiEl = $$('#whoami');
+    const roleEl   = $$('#role');
 
-    // Elements
-    const whoEl = $('#who');
-    const displayNameEl = $('#displayName');
-    const rolePickEl = $('#rolePick');
-    const adminFieldsEl = $('#adminFields');
+    const fmt = (ts) => {
+      if (!ts) return '—';
+      try { const d = ts.toDate ? ts.toDate() : new Date(ts); return d.toLocaleString(); }
+      catch { return '—'; }
+    };
+    const safe = (s) => (s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 
-    const btnSignIn = $('#btnSignIn');
-    const btnUseSaved = $('#btnUseSaved');
-    const btnSignOut = $('#btnSignOut');
+    document.addEventListener('DOMContentLoaded', () => {
+      M.Tabs.init(document.querySelectorAll('.tabs'));
+      M.FormSelect.init(document.querySelectorAll('select'));
+      M.Tooltip.init(document.querySelectorAll('.tooltipped'));
+      const hero = document.getElementById('heroCard');
+      gsap.from('#title3d', {y: -20, opacity: 0, duration: 0.6, ease: 'power2.out'});
+      hero.addEventListener('mousemove', (e) => {
+        const r = hero.getBoundingClientRect();
+        const cx = e.clientX - r.left, cy = e.clientY - r.top;
+        const rx = (cy / r.height - 0.5) * -6;
+        const ry = (cx / r.width - 0.5) * 6;
+        hero.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+      });
+      hero.addEventListener('mouseleave', () => {
+        hero.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg)';
+      });
+    });
 
-    const chatView = $('#chatView');
-    const ticketsView = $('#ticketsView');
-    const adminView = $('#adminView');
+    // UI refs
+    const roleLoginForm = $$('#roleLoginForm');
+    const signUpForm = $$('#signUpForm');
+    const ticketForm = $$('#ticketForm');
+    const settingsForm = $$('#settingsForm');
+    const btnSignOut = $$('#btnSignOut');
+    const appArea = $$('#appArea');
+    const ticketsList = $$('#ticketsList');
+    const studentsList = $$('#studentsList');
+    const historyList = $$('#historyList');
+    const cfgTitle = $$('#cfgTitle');
+    const cfgJoinCode = $$('#cfgJoinCode');
 
-    const tabAdmin = $('#tabAdmin');
-
-    const chatStream = $('#chatStream');
-    const chatInput = $('#chatInput');
-    const btnSend = $('#btnSend');
-
-    const tTitle = $('#tTitle');
-    const tDesc = $('#tDesc');
-    const ticketList = $('#ticketList');
-    const btnAddTicket = $('#btnAddTicket');
-
-    const btnDeleteAllChat = $('#btnDeleteAllChat');
-    const btnDeleteAllTickets = $('#btnDeleteAllTickets');
-    const btnExport = $('#btnExport');
-
-    // Admin recognition (client-side fallback – for convenience only).
-    // For production, set a custom claim `admin:true` via Admin SDK.
-    const ADMIN_EMAILS = [
-      'koza12@unitedcharter.org', // <- add/change your admin emails here
-    ];
     let isAdmin = false;
-    let currentUser = null;
-
-    // Persist and reuse display name
-    const savedName = localStorage.getItem('helpdesk:name');
-    if (savedName) displayNameEl.value = savedName;
-    $('#btnUseSaved').addEventListener('click', () => {
-      if (savedName) { displayNameEl.value = savedName; toast('Loaded your saved name.'); }
-      else toast('No saved name yet.');
-    });
-
-    // Role picker toggles admin email/password fields
-    rolePickEl.addEventListener('change', () => {
-      adminFieldsEl.hidden = rolePickEl.value !== 'admin';
-    });
-
-    /* =======================
-       Auth flows
-       ======================= */
-    btnSignIn.addEventListener('click', async () => {
-      const role = rolePickEl.value;
-      const name = (displayNameEl.value || '').trim().slice(0, 40) || 'Guest';
-      localStorage.setItem('helpdesk:name', name);
-
-      try {
-        if (role === 'admin') {
-          const email = $('#adminEmail').value.trim();
-          const pass  = $('#adminPass').value;
-          if (!email || !pass) return toast('Enter admin email and password.');
-          await signInWithEmailAndPassword(auth, email, pass);
-          // Name will be shown as the account displayName if present
-        } else {
-          // Anonymous student/guest sign-in
-          await signInAnonymously(auth);
-          // Set display name on the anonymous user for UI
-          if (auth.currentUser) await updateProfile(auth.currentUser, { displayName: name });
-        }
-      } catch (e) {
-        console.error(e); toast('Sign-in failed. Check details and try again.');
-      }
-    });
-
-    btnSignOut.addEventListener('click', async () => {
-      try { await signOut(auth); } catch (e) {}
-    });
+    let profile = null;
 
     onAuthStateChanged(auth, async (user) => {
-      currentUser = user;
-      const name = user?.displayName || savedName || 'Guest';
-      whoEl.textContent = name || 'Guest';
-      $('#btnSignOut').hidden = !user;
+      if (!user) { appArea.classList.add('hide'); whoamiEl.textContent = '—'; roleEl.textContent = '—'; return; }
 
-      // Lightweight admin detection (email match). Secure way uses custom claims.
-      isAdmin = !!(user && user.email && ADMIN_EMAILS.includes(user.email));
-      tabAdmin.hidden = !isAdmin;
+      await user.getIdToken(true);
+      const token = await user.getIdTokenResult();
+      isAdmin = !!token.claims.admin;
 
-      // Start/stop listeners based on auth
-      if (user) {
-        startChatListener();
-        startTicketListener();
+      whoamiEl.textContent = user.displayName ? user.displayName : (user.email ? user.email.split('@')[0] : 'User');
+      roleEl.textContent = isAdmin ? 'Admin (Teacher)' : 'Student';
+
+      if (isAdmin) {
+        profile = null;
       } else {
-        chatStream.innerHTML = '';
-        ticketList.innerHTML = '';
-      }
-    });
-
-    /* =======================
-       Chat (Firestore: messages)
-       ======================= */
-    const messagesRef = collection(db, 'messages');
-    let chatUnsub = null;
-
-    function startChatListener(){
-      if (chatUnsub) chatUnsub();
-      const q = query(messagesRef, orderBy('createdAt', 'asc'), limit(300));
-      chatUnsub = onSnapshot(q, (snap) => {
-        chatStream.innerHTML = '';
-        snap.forEach(docSnap => {
-          const m = docSnap.data();
-          const isMe = currentUser && m.uid === currentUser.uid;
-          const bubble = document.createElement('div');
-          bubble.className = 'bubble' + (isMe ? ' me' : '') + (m.role === 'admin' ? ' admin' : '');
-          const meta = document.createElement('div'); meta.className = 'meta';
-          const time = m.createdAt?.toDate ? m.createdAt.toDate() : new Date();
-          meta.innerHTML = `<span class="icon">person</span>${escapeHtml(m.name||'Unknown')} · ${time.toLocaleString()}` +
-                           (isAdmin ? ` · <button data-id="${docSnap.id}" class="btn ghost" style="padding:2px 6px; font-size:12px;">Delete</button>` : '');
-          const msg = document.createElement('div'); msg.className = 'msg'; msg.textContent = m.text || '';
-          bubble.appendChild(meta); bubble.appendChild(msg);
-          chatStream.appendChild(bubble);
-        });
-        chatStream.scrollTop = chatStream.scrollHeight;
-        // Wire up delete buttons (admin only)
-        if (isAdmin) {
-          chatStream.querySelectorAll('button[data-id]').forEach(btn => {
-            btn.onclick = async () => {
-              if (!confirm('Delete this message?')) return;
-              await deleteDoc(doc(db, 'messages', btn.dataset.id));
-            };
-          });
-        }
-      });
-    }
-
-    btnSend.addEventListener('click', () => sendMessage());
-    chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage(); });
-
-    async function sendMessage(){
-      const text = (chatInput.value || '').trim();
-      if (!currentUser) return toast('Please sign in first.');
-      if (!text) return; 
-      try {
-        await addDoc(messagesRef, {
-          text: text.slice(0, 500),
-          uid: currentUser.uid,
-          name: currentUser.displayName || 'Guest',
-          role: isAdmin ? 'admin' : 'student',
-          createdAt: serverTimestamp()
-        });
-        chatInput.value = '';
-      } catch (e) { console.error(e); toast('Could not send. Try again.'); }
-    }
-
-    /* =======================
-       Tickets (Firestore: tickets)
-       ======================= */
-    const ticketsRef = collection(db, 'tickets');
-    let ticketsUnsub = null;
-
-    function startTicketListener(){
-      if (ticketsUnsub) ticketsUnsub();
-      const q = query(ticketsRef, orderBy('createdAt','desc'), limit(200));
-      ticketsUnsub = onSnapshot(q, (snap) => {
-        ticketList.innerHTML = '';
-        snap.forEach(docSnap => renderTicket(docSnap.id, docSnap.data()));
-      });
-    }
-
-    function renderTicket(id, t){
-      const card = document.createElement('div'); card.className = 'ticket';
-      const statusClass = 'status-' + (t.status||'Open').replace(' ','\\ ');
-      card.innerHTML = `
-        <div style="display:flex; gap:8px; align-items:center; justify-content:space-between;">
-          <div class="chip ${statusClass}"><span class="icon">flag</span>${escapeHtml(t.status||'Open')}</div>
-          <div style="font-size:12px; color:var(--muted);">${new Date((t.updatedAt?.toDate?.()||t.createdAt?.toDate?.()||new Date())).toLocaleString()}</div>
-        </div>
-        <div style="font-weight:700; font-size:15px;">${escapeHtml(t.title||'Untitled')}</div>
-        <div style="color:var(--muted);">${escapeHtml(t.desc||'')}</div>
-        <div style="font-size:12px; color:var(--muted);">By ${escapeHtml(t.creatorName||'Unknown')}</div>
-        <div class="ticket-actions">
-          <button class="btn ghost" data-act="prog"><span class="icon">play_arrow</span> In&nbsp;Progress</button>
-          <button class="btn okay" data-act="close"><span class="icon">check_circle</span> Close</button>
-          ${(isAdmin || (currentUser && currentUser.uid===t.creatorUid)) ? `<button class="btn danger" data-act="del"><span class="icon">delete</span> Delete</button>` : ''}
-        </div>
-      `;
-      // Wire actions
-      card.querySelectorAll('button').forEach(btn => {
-        btn.onclick = async () => {
-          if (btn.dataset.act === 'prog') await setTicketStatus(id, 'In Progress');
-          if (btn.dataset.act === 'close') await setTicketStatus(id, 'Closed');
-          if (btn.dataset.act === 'del') {
-            if (!confirm('Delete this ticket?')) return;
-            await deleteDoc(doc(db, 'tickets', id));
+        const pRef = doc(db, 'profiles', user.uid);
+        const snap = await getDoc(pRef);
+        if (snap.exists()) {
+          profile = snap.data();
+          if (profile.disabled) {
+            toast('Your account is disabled. Contact your teacher.');
+            await signOut(auth);
+            return;
           }
-        };
-      });
-      ticketList.appendChild(card);
-    }
-
-    async function setTicketStatus(id, status){
-      const ref = doc(db, 'tickets', id);
-      await updateDoc(ref, { status, updatedAt: serverTimestamp() });
-      toast(`Ticket marked ${status}.`);
-    }
-
-    btnAddTicket.addEventListener('click', async () => {
-      if (!currentUser) return toast('Please sign in first.');
-      const title = (tTitle.value||'').trim();
-      const desc  = (tDesc.value||'').trim();
-      if (!title) return toast('Enter a title.');
-      try {
-        await addDoc(ticketsRef, {
-          title: title.slice(0,80),
-          desc:  desc.slice(0,200),
-          status: 'Open',
-          creatorUid: currentUser.uid,
-          creatorName: currentUser.displayName || 'Guest',
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        });
-        tTitle.value = ''; tDesc.value = '';
-        toast('Ticket added.');
-      } catch (e){ console.error(e); toast('Could not add ticket.'); }
-    });
-
-    /* =======================
-       Admin bulk tools
-       ======================= */
-    btnDeleteAllChat.addEventListener('click', async () => {
-      if (!isAdmin) return toast('Admin only.');
-      if (!confirm('Delete ALL chat messages? This cannot be undone.')) return;
-      await bulkDelete('messages');
-      toast('All chat deleted.');
-    });
-
-    btnDeleteAllTickets.addEventListener('click', async () => {
-      if (!isAdmin) return toast('Admin only.');
-      if (!confirm('Delete ALL tickets? This cannot be undone.')) return;
-      await bulkDelete('tickets');
-      toast('All tickets deleted.');
-    });
-
-    btnExport.addEventListener('click', async () => {
-      if (!isAdmin) return toast('Admin only.');
-      const data = {};
-      data.messages = await dumpCollection('messages');
-      data.tickets  = await dumpCollection('tickets');
-      const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `helpdesk-export-${new Date().toISOString().slice(0,19)}.json`;
-      a.click();
-    });
-
-    async function dumpCollection(name){
-      const out = [];
-      const q = query(collection(db, name), limit(1000));
-      const snap = await getDocs(q);
-      snap.forEach(d => out.push({ id:d.id, ...d.data() }));
-      return out;
-    }
-
-    async function bulkDelete(name){
-      const ref = collection(db, name);
-      let snap = await getDocs(query(ref, limit(500)));
-      while (!snap.empty) {
-        const batch = writeBatch(db);
-        snap.forEach(d => batch.delete(d.ref));
-        await batch.commit();
-        snap = await getDocs(query(ref, limit(500)));
+        } else {
+          toast('Complete sign-up with a valid Join Code first.');
+          await signOut(auth);
+          return;
+        }
       }
+
+      const cfgRef = doc(db, 'config', 'app');
+      const cfgSnap = await getDoc(cfgRef);
+      if (cfgSnap.exists()) {
+        const data = cfgSnap.data();
+        document.getElementById('title3d').textContent = data.title || 'AOIT Live Helpdesk';
+      }
+
+      appArea.classList.remove('hide');
+      bindTickets(user);
+      bindHistory(user);
+      if (isAdmin) {
+        bindStudents();
+        loadSettingsForm();
+        cfgTitle.disabled = false; cfgJoinCode.disabled = false;
+      } else {
+        studentsList.innerHTML = '<li class="collection-item">Students tab is for admins only.</li>';
+        cfgTitle.disabled = true; cfgJoinCode.disabled = true;
+      }
+    });
+
+    // Role-select login
+    roleLoginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const roleChoice = (document.getElementById('roleSelect')).value;
+      const email = (document.getElementById('email')).value.trim();
+      const pass  = (document.getElementById('password')).value;
+      try {
+        const { user } = await signInWithEmailAndPassword(auth, email, pass);
+        await user.getIdToken(true);
+        const token = await user.getIdTokenResult();
+        const claimAdmin = !!token.claims.admin;
+        if (roleChoice === 'teacher' && !claimAdmin) {
+          await signOut(auth);
+          toast('This account is not an admin. Ask Mr Oza to grant admin via the Node script.');
+          return;
+        }
+        if (roleChoice === 'student' && claimAdmin) {
+          toast('Admin account detected — continuing with admin features.');
+        } else {
+          toast('Signed in.');
+        }
+      } catch (err) { console.error(err); toast(err.message); }
+    });
+
+    // Student Sign Up
+    signUpForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = (document.getElementById('upName')).value.trim();
+      const email = (document.getElementById('upEmail')).value.trim();
+      const pass  = (document.getElementById('upPassword')).value;
+      const code  = (document.getElementById('joinCode')).value.trim();
+      try {
+        const { user } = await createUserWithEmailAndPassword(auth, email, pass);
+        await updateProfile(user, { displayName: name });
+        await setDoc(doc(db, 'profiles', user.uid), {
+          displayName: name,
+          role: 'student',
+          classCode: code,
+          disabled: false,
+          createdAt: serverTimestamp(),
+        });
+        toast('Account created. Sign in now.');
+        await signOut(auth);
+      } catch (err) { console.error(err); toast(err.message); }
+    });
+
+    // Global Sign Out
+    btnSignOut.addEventListener('click', async () => {
+      await signOut(auth);
+      toast('Signed out.');
+      location.reload();
+    });
+
+    // History logger
+    async function logHistory(entry) {
+      try { await addDoc(collection(db, 'history'), { ...entry, ts: serverTimestamp() }); }
+      catch (e) { console.warn('History log failed:', e?.message); }
     }
 
-    /* =======================
-       View switching
-       ======================= */
-    $$('.tab').forEach(tab => tab.addEventListener('click', () => {
-      $$('.tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      $$('.view').forEach(v => v.classList.remove('active'));
-      const v = document.getElementById(tab.dataset.view);
-      if (v) v.classList.add('active');
-    }));
-
-    /* =======================
-       Utilities
-       ======================= */
-    function escapeHtml(str=''){
-      return str.replace(/[&<>"']/g, (c)=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+    // Tickets
+    let unsubTickets = null;
+    function bindTickets(user) {
+      if (unsubTickets) unsubTickets();
+      const colRef = collection(db, 'tickets');
+      const qRef = isAdmin
+        ? query(colRef, orderBy('createdAt', 'desc'))
+        : query(colRef, where('ownerUid', '==', user.uid), orderBy('createdAt', 'desc'));
+      unsubTickets = onSnapshot(qRef, (snap) => {
+        ticketsList.innerHTML = '';
+        snap.forEach((docSnap) => {
+          const t = docSnap.data();
+          const li = document.createElement('li');
+          li.className = 'collection-item';
+          li.innerHTML = `
+            <div>
+              <div><strong>${safe(t.title)}</strong></div>
+              <div class="ticket-meta">
+                ${safe(t.ownerName ?? 'Unknown')} •
+                <span class="badge-status badge-${safe((t.status ?? 'open').replace(' ','_'))}">${safe(t.status ?? 'open')}</span> •
+                created: ${fmt(t.createdAt)}${t.updatedAt ? ' • updated: ' + fmt(t.updatedAt) : ''}
+              </div>
+              <div class="grey-text">${safe(t.detail ?? '')}</div>
+            </div>
+            <div>${renderTicketActions(docSnap.id, t)}</div>
+          `;
+          ticketsList.appendChild(li);
+          wireTicketButtons(docSnap.id, t);
+        });
+      });
     }
+
+    function renderTicketActions(id, t) {
+      const actions = [];
+      if (isAdmin) {
+        ['open','in_progress','resolved'].forEach(st => {
+          actions.push(`<span class="badge-status badge-${st.replace(' ','_')} action-chip" data-act="status" data-id="${id}" data-status="${st}" data-cur="${t.status ?? 'open'}">${st}</span>`);
+        });
+        actions.push(`<a class="btn-flat red-text action-chip" data-act="delete" data-id="${id}" title="Delete"><i class="material-icons">delete</i></a>`);
+      } else {
+        if (t.status !== 'resolved') {
+          actions.push(`<a class="btn-flat red-text action-chip" data-act="delete" data-id="${id}" title="Delete"><i class="material-icons">delete</i></a>`);
+        }
+      }
+      return actions.join(' ');
+    }
+
+    function wireTicketButtons(id, t) {
+      document.querySelectorAll(`[data-id="${id}"]`).forEach((el) => {
+        el.addEventListener('click', async (e) => {
+          const target = e.currentTarget;
+          const act = target.getAttribute('data-act');
+          try {
+            if (act === 'delete') {
+              const user = auth.currentUser;
+              await logHistory({
+                type: 'ticket_deleted',
+                ticketId: id,
+                title: t.title,
+                ownerUid: t.ownerUid,
+                ownerName: t.ownerName,
+                actorUid: user?.uid || null,
+                actorName: user?.displayName || (user?.email?.split('@')[0]) || 'User'
+              });
+              await deleteDoc(doc(db, 'tickets', id));
+              toast('Ticket removed.');
+            } else if (act === 'status') {
+              const from = target.getAttribute('data-cur') || t.status || 'open';
+              const to = target.getAttribute('data-status');
+              await updateDoc(doc(db, 'tickets', id), { status: to, updatedAt: serverTimestamp() });
+              const user = auth.currentUser;
+              await logHistory({
+                type: 'status_change',
+                ticketId: id,
+                title: t.title,
+                ownerUid: t.ownerUid,
+                ownerName: t.ownerName,
+                fromStatus: from,
+                toStatus: to,
+                actorUid: user?.uid || null,
+                actorName: user?.displayName || (user?.email?.split('@')[0]) || 'User'
+              });
+              toast('Status updated.');
+            }
+          } catch (err) { console.error(err); toast(err.message); }
+        });
+      });
+    }
+
+    ticketForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const user = auth.currentUser;
+      if (!user) return toast('Please sign in.');
+      const title = (document.getElementById('tTitle')).value.trim();
+      const detail = (document.getElementById('tDetail')).value.trim();
+      try {
+        const docRef = await addDoc(collection(db, 'tickets'), {
+          ownerUid: user.uid,
+          ownerName: user.displayName || (user.email?.split('@')[0]) || 'Student',
+          title, detail,
+          status: 'open',
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+        await logHistory({
+          type: 'ticket_created',
+          ticketId: docRef.id,
+          title,
+          ownerUid: user.uid,
+          ownerName: user.displayName || (user.email?.split('@')[0]) || 'Student',
+          actorUid: user.uid,
+          actorName: user.displayName || (user.email?.split('@')[0]) || 'Student'
+        });
+        (document.getElementById('tTitle')).value = '';
+        (document.getElementById('tDetail')).value = '';
+        M.updateTextFields();
+        toast('Ticket submitted.');
+      } catch (err) { console.error(err); toast(err.message); }
+    });
+
+    // Students (admin)
+    let unsubStudents = null;
+    function bindStudents() {
+      if (unsubStudents) unsubStudents();
+      unsubStudents = onSnapshot(collection(db, 'profiles'), (snap) => {
+        studentsList.innerHTML = '';
+        snap.forEach((docSnap) => {
+          const p = docSnap.data();
+          const li = document.createElement('li');
+          li.className = 'collection-item';
+          li.innerHTML = `
+            <div>
+              <strong>${safe(p.displayName ?? '(no name)')}</strong>
+              <span class="grey-text"> • ${safe(p.role ?? '—')}</span>
+            </div>
+            <div>
+              <a class="btn-flat ${p.disabled ? 'green-text' : 'orange-text'} action-chip" data-act="toggle" data-id="${docSnap.id}">
+                ${p.disabled ? 'Enable' : 'Disable'}
+              </a>
+              <a class="btn-flat red-text action-chip" data-act="remove" data-id="${docSnap.id}" title="Remove">
+                <i class="material-icons">delete</i>
+              </a>
+            </div>
+          `;
+          studentsList.appendChild(li);
+        });
+
+        document.querySelectorAll('#studentsList .action-chip').forEach((el) => {
+          el.addEventListener('click', async (e) => {
+            const target = e.currentTarget;
+            const id = target.getAttribute('data-id');
+            const act = target.getAttribute('data-act');
+            const ref = doc(db, 'profiles', id);
+            if (act === 'toggle') {
+              const snap = await getDoc(ref);
+              if (snap.exists()) {
+                const cur = !!snap.data().disabled;
+                await updateDoc(ref, { disabled: !cur });
+                toast(cur ? 'Enabled' : 'Disabled');
+              }
+            } else if (act === 'remove') {
+              await deleteDoc(ref);
+              toast('Student removed.');
+            }
+          });
+        });
+      });
+    }
+
+    // History (live)
+    let unsubHistory = null;
+    function bindHistory(user) {
+      if (unsubHistory) unsubHistory();
+      const col = collection(db, 'history');
+      const qRef = isAdmin
+        ? query(col, orderBy('ts', 'desc'), limit(200))
+        : query(col, where('ownerUid', '==', user.uid), orderBy('ts', 'desc'), limit(200));
+      unsubHistory = onSnapshot(qRef, (snap) => {
+        historyList.innerHTML = '';
+        snap.forEach((docSnap) => {
+          const h = docSnap.data();
+          const li = document.createElement('li');
+          li.className = 'collection-item';
+          let line = '';
+          if (h.type === 'ticket_created') {
+            line = `<strong>${safe(h.actorName)}</strong> created ticket <em>${safe(h.title)}</em>`;
+          } else if (h.type === 'status_change') {
+            line = `<strong>${safe(h.actorName)}</strong> changed <em>${safe(h.title)}</em> from <b>${safe(h.fromStatus)}</b> to <b>${safe(h.toStatus)}</b>`;
+          } else if (h.type === 'ticket_deleted') {
+            line = `<strong>${safe(h.actorName)}</strong> deleted ticket <em>${safe(h.title)}</em>`;
+          } else {
+            line = `${safe(h.type)} — ${safe(h.title || '')}`;
+          }
+          li.innerHTML = `
+            <div>
+              <div>${line}</div>
+              <div class="ticket-meta">Owner: ${safe(h.ownerName ?? 'Unknown')} • ${fmt(h.ts)}</div>
+            </div>
+          `;
+          historyList.appendChild(li);
+        });
+      });
+    }
+
+    // Settings
+    async function loadSettingsForm() {
+      const ref = doc(db, 'config', 'app');
+      const snap = await getDoc(ref);
+      const data = snap.exists() ? snap.data() : { title: 'AOIT Live Helpdesk', classJoinCode: '' };
+      cfgTitle.value = data.title || '';
+      cfgJoinCode.value = data.classJoinCode || '';
+      M.updateTextFields();
+    }
+    settingsForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        await setDoc(doc(db, 'config', 'app'), {
+          title: cfgTitle.value.trim(),
+          classJoinCode: cfgJoinCode.value.trim()
+        }, { merge: true });
+        document.getElementById('title3d').textContent = cfgTitle.value.trim() || 'AOIT Live Helpdesk';
+        toast('Settings saved.');
+      } catch (err) { console.error(err); toast(err.message); }
+    });
   </script>
 
-  <!--
-  ======================================================
-  🔒 Recommended Firestore security rules (paste in Rules)
-  ======================================================
-  rules_version = '2';
-  service cloud.firestore {
-    match /databases/{database}/documents {
-      function isAdmin() { return request.auth.token.admin == true; }
-
-      match /messages/{id} {
-        allow read: if true; // anyone can read chat history
-        allow create: if request.auth != null; // signed-in users can post
-        allow update, delete: if isAdmin() || request.auth.uid == resource.data.uid;
-      }
-
-      match /tickets/{id} {
-        allow read: if true;
-        allow create: if request.auth != null;
-        allow update, delete: if isAdmin() || request.auth.uid == resource.data.creatorUid;
-      }
-    }
-  }
-
-  👉 How to enable admin securely: use Firebase Admin SDK (server/Cloud Function) to set a custom claim on your admin user:
-     admin.auth().setCustomUserClaims('<ADMIN_UID>', { admin: true })
-  Then re‑authenticate the admin account so request.auth.token.admin is present.
-
-  Client‑side ADMIN_EMAILS is for convenience only (not secure). Do not rely on it for production.
-  -->
+  <!-- No Firebase Storage used in the app. -->
 </body>
 </html>
+"""
+path = "/mnt/data/index-role-select-helpdesk-oza-credit.html"
+with open(path, "w") as f:
+    f.write(html)
+path
